@@ -1,0 +1,18 @@
+{
+  "name": "placement_backend",
+  "version": "1.0.0",
+  "description": "palcement application backend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "nodejs",
+    "expressjs",
+    "mongoose",
+    "mongodb",
+    "cloudinary"
+  ],
+  "author": "yashodhan,ayush,pundalik,vishwaved",
+  "license": "ISC"
+}
