@@ -14,5 +14,8 @@
     "cloudinary"
   ],
   "author": "yashodhan,ayush,pundalik,vishwaved",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "prettier": "^3.3.3"
+  }
 }
