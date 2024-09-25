@@ -1,4 +1,4 @@
-import express, { urlencoded } from "express";
+import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
@@ -14,5 +14,13 @@ app.use(
   })
 );
 app.use(cookieParser());
+
+// importing routes
+import sendOtpRouter from "./routes/sendOTP.Routes.js";
+// end of importing routes
+
+// apis / routes
+app.use("/api/v1/emp", sendOtpRouter);
+// end of apis / routes
 
 export { app };
