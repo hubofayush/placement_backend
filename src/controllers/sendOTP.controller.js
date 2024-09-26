@@ -6,9 +6,9 @@ import { sendOtp } from "../utils/sendOTP.js";
 // OTP generation //
 
 function generateOTP() {
-  // Generate a random number between 100000 and 999999
-  const otp = Math.floor(100000 + Math.random() * 900000);
-  return otp;
+    // Generate a random number between 100000 and 999999
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    return otp;
 }
 
 // end of OTP generation //
@@ -16,24 +16,30 @@ function generateOTP() {
 // send otp
 
 const sendOtpEmployee = asyncHandler(async (req, res) => {
-  const { mob } = req.body;
-  if (!mob) {
-    throw new ApiError(400, "mobile number required");
-  }
+    const { mob } = req.body;
+    if (!mob) {
+        throw new ApiError(400, "mobile number required");
+    }
 
-  const otp = generateOTP();
-  console.log(otp);
-  const body = `Dear user your OTP is ${otp}`;
+    const otp = generateOTP();
+    console.log(otp);
+    const body = `Dear user your OTP is ${otp}`;
 
-  const sendOTPMobile = await sendOtp(mob, body);
+    const sendOTPMobile = await sendOtp(mob, body);
 
-  if (!sendOTPMobile) {
-    throw new ApiError(404, "cant send otp");
-  }
+    if (!sendOTPMobile) {
+        throw new ApiError(404, "cant send otp");
+    }
 
-  return res
-    .status(200)
-    .json(new ApiResponce(200, sendOTPMobile, "message sent successfully"));
+    return res
+        .status(200)
+        .json(
+            new ApiResponce(
+                200,
+                { sendOTPMobile, otp },
+                "message sent successfully",
+            ),
+        );
 });
 // end of send otp
 

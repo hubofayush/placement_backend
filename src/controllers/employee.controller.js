@@ -7,6 +7,7 @@ import {
     deleteImageOnCloudinary,
 } from "../utils/cloudinary.js";
 
+// register employee //
 const Register = asyncHandler(async (req, res) => {
     const {
         fName,
@@ -83,22 +84,44 @@ const Register = asyncHandler(async (req, res) => {
         },
     });
 
-    const registerEmployee = await Employee.findById(employee._id);
+    // const registerEmployee = await Employee.findById(employee._id);
 
-    if (!registerEmployee) {
+    if (!employee) {
         throw new ApiError(404, "Employee not Registred ");
     }
 
     return res
         .status(201)
-        .json(
-            new ApiResponce(
-                200,
-                registerEmployee,
-                "user registered successfully",
-            ),
-        );
+        .json(new ApiResponce(200, employee, "user registered successfully"));
     // end of creating employee
 });
+// end of register employee //
 
-export { Register };
+// login employee //
+const loginEmployee = asyncHandler(async (req, res) => {
+    const { phone, password } = req.body;
+
+    if (!phone || !password) {
+        throw new ApiError(401, "phone or password required");
+    }
+
+    const findEmployee = await Employee.findOne({
+        phone,
+    });
+
+    if (!findEmployee) {
+        throw new ApiError(404, "user not found");
+    }
+    console.log(findEmployee);
+
+    const employeeReturn = await Employee.findById(findEmployee._id).select(
+        "-password",
+    );
+
+    return res
+        .status(200)
+        .json(new ApiResponce(200, employeeReturn, "employee found"));
+});
+// end of login employee //
+
+export { Register, loginEmployee };

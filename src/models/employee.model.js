@@ -47,19 +47,23 @@ const EmployeeSchema = new Schema(
             default: 1,
         },
         workExperience: {
-            experience: {
-                type: String,
-                required: true,
-            },
-            position: {
-                type: String,
-            },
-            salary: {
-                type: Number,
-            },
-            employed: {
-                type: Boolean,
-            },
+            type: [
+                {
+                    experience: {
+                        type: String,
+                        required: true,
+                    },
+                    position: {
+                        type: String,
+                    },
+                    salary: {
+                        type: Number,
+                    },
+                    employed: {
+                        type: Boolean,
+                    },
+                },
+            ],
         },
         education: {
             type: String,
@@ -83,6 +87,12 @@ const EmployeeSchema = new Schema(
                 type: Number,
             },
         },
+        subscription: [
+            {
+                type: mongoose.Schema.ObjectId,
+                ref: "subscription",
+            },
+        ],
     },
     { timestamps: true },
 );
