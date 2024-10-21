@@ -25,24 +25,24 @@ const sendOtpEmployee = asyncHandler(async (req, res) => {
     console.log(otp);
     const body = `Dear user your OTP is ${otp}`;
 
-    // const sendOTPMobile = await sendOtp(mob, body); actual code
+    const sendOTPMobile = await sendOtp(mobile, body); // actual code
 
-    // if (!sendOTPMobile) {
-    //     throw new ApiError(404, "cant send otp");
-    // }
+    if (!sendOTPMobile) {
+        throw new ApiError(404, "cant send otp");
+    }
 
     return res
         .status(200)
         .json(
-            new ApiResponce(200, { otp, mobile }, "message sent successfully"),
-        ); // for testing
+            new ApiResponce(
+                200,
+                { sendOTPMobile, otp },
+                "message sent successfully",
+            ),
+        );
     // .json(
-    //     new ApiResponce(
-    //         200,
-    //         { sendOTPMobile, otp },
-    //         "message sent successfully",
-    //     ),
-    // );
+    //     new ApiResponce(200, { otp, mobile }, "message sent successfully"),
+    // ); // for testing
 });
 // end of send otp
 
