@@ -47,23 +47,8 @@ const EmployeeSchema = new Schema(
             default: 1,
         },
         workExperience: {
-            type: [
-                {
-                    experience: {
-                        type: String,
-                        required: true,
-                    },
-                    position: {
-                        type: String,
-                    },
-                    salary: {
-                        type: Number,
-                    },
-                    employed: {
-                        type: Boolean,
-                    },
-                },
-            ],
+            type: mongoose.Schema.ObjectId,
+            ref: "Experience",
         },
         education: {
             type: String,
@@ -76,16 +61,8 @@ const EmployeeSchema = new Schema(
             },
         ],
         lcoation: {
-            district: {
-                type: String,
-                default: "Ratnagiri",
-            },
-            division: {
-                type: String,
-            },
-            pincode: {
-                type: Number,
-            },
+            type: mongoose.Schema.ObjectId,
+            ref: "Location",
         },
         subscription: [
             {
