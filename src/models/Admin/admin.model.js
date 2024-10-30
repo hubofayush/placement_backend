@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
+import mongoose, { Schema } from "mongoose";
 
-const AdminSchema = new mongoose.Schema(
+const AdminSchema = new Schema(
     {
         // Basic Admin Details
         name: {
@@ -33,16 +33,16 @@ const AdminSchema = new mongoose.Schema(
 
         // Manage Subscriptions
         EmployeeSubscriptions: [
-            { type: mongoose.Schema.ObjectId, ref: "Employee" },
+            { type: Schema.Types.ObjectId, ref: "Employee" },
         ],
         EmployerSubscriptions: [
-            { type: mongoose.Schema.ObjectId, ref: "Employer" },
+            { type: Schema.Types.ObjectId, ref: "Employer" },
         ],
 
         // Admin Access to Employees
         employees: [
             {
-                type: mongoose.Schema.ObjectId,
+                type: Schema.Types.ObjectId,
                 ref: "Employee",
             },
         ],
@@ -50,7 +50,7 @@ const AdminSchema = new mongoose.Schema(
         // Admin Access to Employers/Companies
         employers: [
             {
-                type: mongoose.Schema.ObjectId,
+                type: Schema.Types.ObjectId,
                 ref: "Employer", // Assuming 'Employer' is another schema/model for companies
             },
         ],
@@ -58,7 +58,7 @@ const AdminSchema = new mongoose.Schema(
         // Admin Access to Applications
         applications: [
             {
-                type: mongoose.Schema.ObjectId,
+                type: Schema.Types.ObjectId,
                 ref: "Application", // Assuming 'Application' is a schema for job applications
             },
         ],

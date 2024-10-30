@@ -3,7 +3,7 @@ import mongoose, { Schema } from "mongoose";
 const employeeSubscriptionSchema = new Schema(
     {
         employee: {
-            type: mongoose.Schema.ObjectId,
+            type: Schema.Types.ObjectId,
             ref: "Emplyee",
         },
         subscriptionType: {
@@ -18,7 +18,7 @@ const employeeSubscriptionSchema = new Schema(
     { timestamps: true },
 );
 
-export const employeeSubscription = mongoose.model(
+export const EmployeeSubscription = mongoose.model(
     "EmployeeSubscription",
     employeeSubscriptionSchema,
 );

@@ -3,8 +3,7 @@ import mongoose, { Schema } from "mongoose";
 const experienceSchema = new Schema(
     {
         employee: {
-            type: mongoose.Schema.ObjectId,
-
+            type: Schema.Types.ObjectId,
             ref: "Employee",
         },
         yearOfExperience: {
@@ -29,4 +28,4 @@ const experienceSchema = new Schema(
     { timestamps: true },
 );
 
-export const experience = mongoose.model("Experience", experienceSchema);
+export const Experience = mongoose.model("Experience", experienceSchema);

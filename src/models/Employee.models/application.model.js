@@ -3,7 +3,7 @@ import mongoose, { Schema } from "mongoose";
 const applicationSchema = new Schema(
     {
         employee: {
-            type: mongoose.Schema.ObjectId,
+            type: Schema.Types.ObjectId,
             ref: "Employee",
         },
         bid: {
@@ -13,11 +13,11 @@ const applicationSchema = new Schema(
             type: String,
         },
         jobApplication: {
-            type: mongoose.Schema.ObjectId,
+            type: Schema.Types.ObjectId,
             ref: "JobApplication",
         },
     },
     { timestamps: true },
 );
 
-export const application = mongoose.model("Application", applicationSchema);
+export const Application = mongoose.model("Application", applicationSchema);

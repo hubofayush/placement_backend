@@ -3,11 +3,11 @@ import mongoose, { Schema } from "mongoose";
 const locationSchema = new Schema(
     {
         employee: {
-            type: mongoose.Schema.ObjectId,
+            type: Schema.Types.ObjectId,
             ref: "Employee",
         },
         employer: {
-            type: mongoose.Schema.ObjectId,
+            type: Schema.Types.ObjectId,
             ref: "Employer",
         },
         state: {

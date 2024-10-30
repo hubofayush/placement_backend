@@ -2,4 +2,4 @@ import mongoose, { Schema } from "mongoose";
 
 const jobApplicationSchema = new Schema({}, { timestamps: true });
 
-const jobApplication = mongoose.model("JobApplicaiton", jobApplicationSchema);
+const JobApplicaiton = mongoose.model("JobApplicaiton", jobApplicationSchema);
