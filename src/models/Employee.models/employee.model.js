@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 const EmployeeSchema = new Schema(
     {
@@ -46,30 +47,37 @@ const EmployeeSchema = new Schema(
             type: Number,
             default: 1,
         },
-        workExperience: {
-            type: mongoose.Schema.ObjectId,
-            ref: "Experience",
-        },
+        workExperience: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: "Experience",
+            },
+        ],
         education: {
             type: String,
             required: true,
         },
         applications: [
             {
-                type: mongoose.Schema.ObjectId,
+                type: Schema.Types.ObjectId,
                 ref: "Application",
             },
         ],
-        lcoation: {
-            type: mongoose.Schema.ObjectId,
-            ref: "Location",
-        },
-        subscription: [
+        location: [
             {
-                type: mongoose.Schema.ObjectId,
-                ref: "subscription",
+                type: Schema.Types.ObjectId,
+                ref: "Location",
             },
         ],
+        subscription: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: "EmployeeSubscription",
+            },
+        ],
+        refreshToken: {
+            type: String,
+        },
     },
     { timestamps: true },
 );
@@ -87,4 +95,32 @@ EmployeeSchema.methods.isPasswordCorrect = async function (password) {
 };
 // end of check password is correct
 
+// making the access token //
+EmployeeSchema.methods.generateAccessToken = async function () {
+    return jwt.sign(
+        {
+            _id: this._id,
+            type: "employee",
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        {
+            expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
+        },
+    );
+};
+// making the access token //
+
+// making refresh token //
+EmployeeSchema.methods.generateRefreshToken = function () {
+    return jwt.sign(
+        {
+            _id: this._id,
+        },
+        process.env.REFRESH_TOKEN_SECRET,
+        {
+            expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
+        },
+    );
+};
+// making refresh token //
 export const Employee = mongoose.model("Employee", EmployeeSchema);
