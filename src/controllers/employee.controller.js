@@ -311,7 +311,7 @@ const loginEmployee = asyncHandler(async (req, res) => {
     // generating tolens by id //
     const { accessToken, refreshToken } = await generateToken(findEmployee._id);
     // end of generating tolens by id //
-
+    console.log("access tokens ", accessToken, refreshToken);
     // getting new employee with refresh token //
     const employeeReturn = await Employee.findById(findEmployee._id).select(
         "-password -refreshToken",
@@ -335,8 +335,8 @@ const loginEmployee = asyncHandler(async (req, res) => {
                 200,
                 {
                     employee: employeeReturn,
-                    accessToken: accessToken,
-                    refreshToken: refreshToken,
+                    accessToken,
+                    refreshToken,
                 },
                 "employee found",
             ),
@@ -347,4 +347,45 @@ const loginEmployee = asyncHandler(async (req, res) => {
  *  __________END OF LOGIN EMPLOYEE_____________
  **/
 
-export { Register, loginEmployee };
+/**
+ * ___________LOG OUT EMPLOYEE________________
+ */
+
+const logoutEmployee = asyncHandler(async (req, res) => {
+    /**
+     * 1. find user by id
+     * 2. set employees refresh token or accesstoken undefined
+     * 3. Update user
+     * 4. return responce
+     * 5. delete cookies
+     */
+    // finding employee by id //
+    await Employee.findOneAndUpdate(
+        req.employee?._id,
+        {
+            $set: {
+                refreshToken: undefined, // updating user //
+            },
+        },
+        {
+            new: true,
+        },
+    );
+    // end of finding employee by id //
+    const options = {
+        httpOnly: true,
+        secure: true,
+    };
+    // return responce //
+    return res
+        .status(200)
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
+        .json(new ApiResponce(200, {}, "Employee logout successfully"));
+    // end of return responce //
+});
+
+/**
+ * ___________END OF LOG OUT EMPLOYEE________________
+ */
+export { Register, loginEmployee, logoutEmployee };
