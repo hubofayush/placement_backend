@@ -5,7 +5,7 @@ import { Employee } from "../models/Employee.models/employee.model.js";
 
 export const verifyJWT = asyncHandler(async (req, res, next) => {
     try {
-        console.log(req.cookies);
+        // checking the accesstokens which is strored in device or in browser
         const token =
             req.cookies?.accessToken ||
             req.header("Authorization")?.replace("Bearer ", "");
@@ -14,11 +14,9 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
             throw new ApiError(401, "Unuathorized Access,Please Log in");
         }
 
-        const decodedToken = await jwt.verify(
-            token,
-            process.env.ACCESS_TOKEN_SECRET,
-        );
+        const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET); // decoding the tokens //
 
+        // finnding users from decoded token id //
         const employee = await Employee.findById(decodedToken?._id).select(
             "-password -refreshToken",
         );
@@ -30,8 +28,8 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
             );
         }
 
-        req.employee = employee;
-        next();
+        req.employee = employee; // fetched user info is set as coockies
+        next(); // next midddleware
     } catch (error) {
         throw new ApiError(401, error?.message || "invalid access token");
     }
