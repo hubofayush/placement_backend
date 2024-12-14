@@ -311,7 +311,7 @@ const loginEmployee = asyncHandler(async (req, res) => {
     // generating tolens by id //
     const { accessToken, refreshToken } = await generateToken(findEmployee._id);
     // end of generating tolens by id //
-    console.log("access tokens ", accessToken, refreshToken);
+
     // getting new employee with refresh token //
     const employeeReturn = await Employee.findById(findEmployee._id).select(
         "-password -refreshToken",
@@ -388,4 +388,31 @@ const logoutEmployee = asyncHandler(async (req, res) => {
 /**
  * ___________END OF LOG OUT EMPLOYEE________________
  */
-export { Register, loginEmployee, logoutEmployee };
+
+/**
+ * _____ check current user________
+ */
+
+const getCurrentUser = asyncHandler(async (req, res) => {
+    console.log(req.employee);
+    return res
+        .status(200)
+        .json(
+            new ApiResponce(
+                200,
+                req.employee,
+                "current user fetched successfully",
+            ),
+        );
+});
+/**
+ * _____END OF check current user________
+ */
+
+/**
+ * _________ Exporting functions ___________S
+ */
+export { Register, loginEmployee, logoutEmployee, getCurrentUser };
+/**
+ * ____ END OF exprting function_________
+ */
