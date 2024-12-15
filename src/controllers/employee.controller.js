@@ -6,7 +6,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import mongoose from "mongoose";
 import { Location } from "../models/location.model.js";
 import { Experience } from "../models/Employee.models/experience.model.js";
-import jwt from "jsonwebtoken";
+// import jwt from "jsonwebtoken";
 
 /**
  *  __GENERATE TOKENS FUNCTION
@@ -390,6 +390,45 @@ const logoutEmployee = asyncHandler(async (req, res) => {
  */
 
 /**
+ * _________UPDATE USER INFO________
+ */
+// TODO: update employeee function
+// FIXME: test this end point
+const updateEmployee = asyncHandler(async (req, res) => {
+    const { name, lastName, mobile, email, adress } = req.body;
+
+    if (!(name, lastName, mobile, email)) {
+        throw new ApiError(400, "Feild Required");
+    }
+
+    const employee = await Employee.findByIdAndUpdate(
+        req.employee?._id,
+        {
+            $set: {
+                fName: name,
+                lName: lastName,
+                email: email,
+                phone: mobile,
+            },
+        },
+        {
+            $new: true,
+        },
+    );
+
+    if (!employee) {
+        throw new ApiError(401, "Error on finding error");
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponce(200, employee, "Updated successfully"));
+});
+/**
+ * ________END OF UPDATE USER________
+ */
+
+/**
  * _____ check current user________
  */
 
@@ -412,7 +451,13 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 /**
  * _________ Exporting functions ___________S
  */
-export { Register, loginEmployee, logoutEmployee, getCurrentUser };
+export {
+    Register,
+    loginEmployee,
+    logoutEmployee,
+    getCurrentUser,
+    updateEmployee,
+};
 /**
  * ____ END OF exprting function_________
  */
