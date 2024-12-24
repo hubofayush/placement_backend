@@ -390,6 +390,48 @@ const logoutEmployee = asyncHandler(async (req, res) => {
  */
 
 /**
+ * _____________CHANGE PASSWORD____________
+ */
+const updatePassword = asyncHandler(async (req, res) => {
+    /**
+     * 1. get new password as input
+     * 2. find employee by req employee id
+     * 3. update the emplyee and save
+     * 4. retrun res
+     */
+
+    // getting password from user //
+    const { password } = req.body;
+    // console.log(password);
+
+    // checking password is available or not //
+    if (!password) {
+        throw new ApiError(400, "Password Required");
+    }
+    // end checking password is available or not //
+
+    // findind emplyee by req.employee basically cookie //
+    const employee = await Employee.findById(req.employee?._id);
+    // end findind emplyee by req.employee basically cookie //
+
+    if (!employee) {
+        throw new ApiError(400, {}, "something went wrong while finding user");
+    }
+
+    // updating employee password //
+    employee.password = password;
+    await employee.save({ validateBeforeSave: false }); // not validating user before save //
+    // end of updating employee password //
+
+    return res
+        .status(200)
+        .json(new ApiResponce(200, employee, "Password Changed"));
+});
+/**
+ * _____________END OF CHANGE PASSWORD____________
+ */
+
+/**
  * _________UPDATE USER INFO________
  */
 // TODO: update employeee function
@@ -457,6 +499,7 @@ export {
     logoutEmployee,
     getCurrentUser,
     updateEmployee,
+    updatePassword,
 };
 /**
  * ____ END OF exprting function_________
