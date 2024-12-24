@@ -6,7 +6,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import mongoose from "mongoose";
 import { Location } from "../models/location.model.js";
 import { Experience } from "../models/Employee.models/experience.model.js";
-import jwt from "jsonwebtoken";
+// import jwt from "jsonwebtoken";
 
 /**
  *  __GENERATE TOKENS FUNCTION
@@ -390,6 +390,87 @@ const logoutEmployee = asyncHandler(async (req, res) => {
  */
 
 /**
+ * _____________CHANGE PASSWORD____________
+ */
+const updatePassword = asyncHandler(async (req, res) => {
+    /**
+     * 1. get new password as input
+     * 2. find employee by req employee id
+     * 3. update the emplyee and save
+     * 4. retrun res
+     */
+
+    // getting password from user //
+    const { password } = req.body;
+    // console.log(password);
+
+    // checking password is available or not //
+    if (!password) {
+        throw new ApiError(400, "Password Required");
+    }
+    // end checking password is available or not //
+
+    // findind emplyee by req.employee basically cookie //
+    const employee = await Employee.findById(req.employee?._id);
+    // end findind emplyee by req.employee basically cookie //
+
+    if (!employee) {
+        throw new ApiError(400, {}, "something went wrong while finding user");
+    }
+
+    // updating employee password //
+    employee.password = password;
+    await employee.save({ validateBeforeSave: false }); // not validating user before save //
+    // end of updating employee password //
+
+    return res
+        .status(200)
+        .json(new ApiResponce(200, employee, "Password Changed"));
+});
+/**
+ * _____________END OF CHANGE PASSWORD____________
+ */
+
+/**
+ * _________UPDATE USER INFO________
+ */
+// TODO: update employeee function
+// FIXME: test this end point
+const updateEmployee = asyncHandler(async (req, res) => {
+    const { name, lastName, mobile, email, adress } = req.body;
+
+    if (!(name, lastName, mobile, email)) {
+        throw new ApiError(400, "Feild Required");
+    }
+
+    const employee = await Employee.findByIdAndUpdate(
+        req.employee?._id,
+        {
+            $set: {
+                fName: name,
+                lName: lastName,
+                email: email,
+                phone: mobile,
+            },
+        },
+        {
+            $new: true,
+        },
+    );
+
+    if (!employee) {
+        throw new ApiError(401, "Error on finding error");
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponce(200, employee, "Updated successfully"));
+});
+/**
+ * ________END OF UPDATE USER________
+ */
+
+/**
  * _____ check current user________
  */
 
@@ -412,7 +493,14 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 /**
  * _________ Exporting functions ___________S
  */
-export { Register, loginEmployee, logoutEmployee, getCurrentUser };
+export {
+    Register,
+    loginEmployee,
+    logoutEmployee,
+    getCurrentUser,
+    updateEmployee,
+    updatePassword,
+};
 /**
  * ____ END OF exprting function_________
  */

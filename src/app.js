@@ -5,7 +5,7 @@ import cookieParser from "cookie-parser";
 const app = express();
 
 app.use(express.json({ limit: "128kb" }));
-app.use(express.urlencoded({ extended: true, limit: "16kb" }));
+app.use(express.urlencoded({ extended: true, limit: "16kb" })); // for form data
 app.use(express.static("public"));
 app.use(
     cors({
@@ -15,10 +15,15 @@ app.use(
 );
 app.use(cookieParser());
 
+// importing routes //
 
-// importing routes
+//**________SATNDARD ROUTES______________ */
 import sendOtpRouter from "./routes/sendOTP.Routes.js";
+//**________END OF SATNDARD ROUTES______________ */
+
+//**________EMPLOYEE ROUTES______________ */
 import employeeRouter from "./routes/employee.routes.js";
+//**________END OF EMPLOYEE ROUTES______________ */
 // end of importing routes
 
 // apis / routes

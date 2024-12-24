@@ -6,6 +6,8 @@ import {
     loginEmployee,
     logoutEmployee,
     Register,
+    updateEmployee,
+    updatePassword,
 } from "../controllers/employee.controller.js";
 const router = Router();
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -24,6 +26,8 @@ router.route("/login").get(loginEmployee);
  */
 router.route("/logout").post(verifyJWT, logoutEmployee);
 router.route("/getUser").get(verifyJWT, getCurrentUser);
+router.route("/updateUser").patch(verifyJWT, updateEmployee);
+router.route("/updatePassword").patch(verifyJWT, updatePassword);
 /**
  *  END OF SECURED ROUTES
  */
