@@ -62,6 +62,15 @@ const EmployerSchema = new Schema(
 // hashing password before saving employer //
 
 // using the mongoose middleware //
+/**
+ * Pre-save middleware to hash the employer's password before saving it to the database.
+ *
+ * This middleware runs before saving a new employer document or updating an existing one.
+ * It checks if the password field has been modified, and if so, hashes it using bcrypt.
+ * This ensures that the password is stored securely as a hash, rather than in plain text.
+ *
+ * @param {Function} next - A callback function that passes control to the next middleware.
+ */
 EmployerSchema.pre("save", async function (next) {
     if (this.password?.isModified("password")) return next(); // checking password is chnged or not
     this.password = bcrypt.hash(this.password, 10);
@@ -71,6 +80,15 @@ EmployerSchema.pre("save", async function (next) {
 // end of hashing password before saving employer //
 
 // checking password is correct //
+/**
+ * Compares a plain-text password with the hashed password stored in the employer document.
+ *
+ * This method is used to verify if the provided password matches the hashed password in the database.
+ * The bcrypt `compare` method performs a secure comparison without exposing the hashed password.
+ *
+ * @param {string} password - The plain-text password provided for comparison.
+ * @returns {Promise<boolean>} - Resolves to `true` if the passwords match, otherwise `false`.
+ */
 EmployerSchema.methods.isPasswordCorrect = async function (password) {
     return await bcrypt.compare(password, this.password);
 };
@@ -109,6 +127,17 @@ EmployerSchema.methods.generateAccessToken = function () {
 // end of generating access token //
 
 // genrating refresh token //
+/**
+ * Generates a signed JSON Web Token (JWT) to serve as a refresh token for the employer instance.
+ *
+ * The `jwt.sign` method is used to create the token by encoding the provided payload and signing it with a secret key.
+ * It ensures the integrity and authenticity of the token, which can later be verified using the same secret key.
+ *
+ * @returns {string} - A signed JWT configured as a refresh token.
+ * @JWTfunction : signs
+ * @param { id} -  of employer
+ * @load : refresh secret and expiery
+ */
 EmployerSchema.methods.generateRefreshToken = function () {
     return jwt.sign(
         {
@@ -117,7 +146,7 @@ EmployerSchema.methods.generateRefreshToken = function () {
         },
         process.env.REFRESH_TOKEN_SECRET,
         {
-            expiresIn: REFRESH_TOKEN_EXPIRY,
+            expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
         },
     );
 };
