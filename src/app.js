@@ -24,6 +24,10 @@ import sendOtpRouter from "./routes/sendOTP.Routes.js";
 //**________EMPLOYEE ROUTES______________ */
 import employeeRouter from "./routes/employee.routes.js";
 //**________END OF EMPLOYEE ROUTES______________ */
+
+// **_______EMPLOYER ROUTES_____________*/
+import employerRouter from "./routes/EmployerRoutes/employer.routes.js";
+// **_______EMD OF EMPLOYER ROUTES_____________*/
 // end of importing routes
 
 // apis / routes
@@ -37,5 +41,9 @@ app.use("/api/v1/emp", employeeRouter);
 // end of register route //
 
 // end of employee routes //
+
+// employer Routes //
+app.use("/api/v1/emr", employerRouter);
+// end of employer Routes //
 
 export { app };

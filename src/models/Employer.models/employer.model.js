@@ -11,7 +11,7 @@ const EmployerSchema = new Schema(
             type: String,
             required: true,
         },
-        lcoation: {
+        location: {
             type: String,
             required: true,
         },
@@ -72,7 +72,7 @@ const EmployerSchema = new Schema(
  * @param {Function} next - A callback function that passes control to the next middleware.
  */
 EmployerSchema.pre("save", async function (next) {
-    if (this.password?.isModified("password")) return next(); // checking password is chnged or not
+    if (!this.isModified("password")) return next(); // checking password is chnged or not
     this.password = bcrypt.hash(this.password, 10);
 
     next();

@@ -2,9 +2,9 @@ import mongoose, { Schema } from "mongoose";
 
 const employerSubscriptionSchema = new Schema(
     {
-        employee: {
+        employer: {
             type: Schema.Types.ObjectId,
-            ref: "Emplyee",
+            ref: "Employer",
         },
         subscriptionType: {
             type: String,
