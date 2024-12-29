@@ -49,6 +49,9 @@ const EmployerSchema = new Schema(
         DIN: {
             type: String,
         },
+        refreshToken: {
+            type: String,
+        },
     },
     { timestamps: true },
 );
@@ -71,9 +74,12 @@ const EmployerSchema = new Schema(
  *
  * @param {Function} next - A callback function that passes control to the next middleware.
  */
+
 EmployerSchema.pre("save", async function (next) {
-    if (!this.isModified("password")) return next(); // checking password is chnged or not
-    this.password = bcrypt.hash(this.password, 10);
+    if (!this.isModified("password")) {
+        return next();
+    } // checking password is chnged or not
+    this.password = await bcrypt.hash(this.password, 10);
 
     next();
 });

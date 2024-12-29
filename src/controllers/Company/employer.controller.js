@@ -6,6 +6,27 @@ import { EmployerSubscription } from "../../models/Employer.models/employerSubsc
 import mongoose from "mongoose";
 
 /**
+ * ________________ Generate Token _____________
+ */
+const generateToken = async (id) => {
+    try {
+        const employer = await Employer.findById(id);
+
+        const accessToken = await employer.generateAccessToken();
+        const refreshToken = await employer.generateRefreshToken();
+
+        employer.refreshToken = refreshToken;
+        employer.save({ validateBeforeSave: false });
+        return { accessToken, refreshToken };
+    } catch (error) {
+        throw new ApiError(500, `Token Generation Failed: ${error.message}`);
+    }
+};
+/**
+ * ________________ END OF Generate Token _____________
+ */
+
+/**
  * ________________ Register Employer _____________
  */
 /**
@@ -109,4 +130,57 @@ const createEmployer = asyncHandler(async (req, res) => {
 /**
  * ________________ END OF Register Employer _____________
  */
-export { createEmployer };
+
+/**
+ * _______________ Login Employer _______________
+ */
+const loginEmployer = asyncHandler(async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        throw new ApiError(400, "Please provide email and password");
+    }
+
+    const employer = await Employer.findOne({ email });
+
+    if (!employer) {
+        throw new ApiError(400, "Invalid email ");
+    }
+
+    const isPasswordCorrect = await employer.isPasswordCorrect(password);
+    if (!isPasswordCorrect) {
+        throw new ApiError(400, "Invalid Password");
+    }
+
+    const { accessToken, refreshToken } = await generateToken(employer._id);
+
+    const employerData = await Employer.findById(employer._id).select(
+        "-password -refreshToken",
+    );
+
+    const options = {
+        httpOnly: true,
+        secure: true,
+    };
+
+    return res
+        .status(200)
+        .cookie("refreshTokenemp", refreshToken, options)
+        .cookie("accessTokenemp", accessToken, options)
+        .json(
+            new ApiResponce(
+                200,
+                {
+                    employer: employerData,
+                    accessToken,
+                    employerData,
+                },
+                "Login Successfully",
+            ),
+        );
+});
+/**
+ * _______________END OF Login Employer _______________
+ */
+
+export { createEmployer, loginEmployer };
