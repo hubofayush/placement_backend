@@ -115,6 +115,7 @@ EmployeeSchema.methods.generateRefreshToken = function () {
     return jwt.sign(
         {
             _id: this._id,
+            type: "employee",
         },
         process.env.REFRESH_TOKEN_SECRET,
         {
