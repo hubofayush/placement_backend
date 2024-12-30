@@ -11,12 +11,14 @@ import {
 } from "../controllers/employee.controller.js";
 const router = Router();
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { getAllApplications } from "../controllers/job/employeeApplication.controller.js";
 
 /**
  * INSECURED ROUTES
  */
 router.route("/register").post(upload.single("avatar"), Register);
 router.route("/login").get(loginEmployee);
+router.route("/").get(getAllApplications);
 /**
  *  END OF INSECURED ROUTES
  */

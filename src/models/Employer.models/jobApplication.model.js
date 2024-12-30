@@ -65,6 +65,12 @@ const jobApplicationSchema = new Schema(
             required: true,
             min: date,
         },
+        applications: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: "Application",
+            },
+        ],
     },
     { timestamps: true },
 );

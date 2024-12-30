@@ -1,4 +1,4 @@
-import { Employer } from "../../models/Employer.models/employer.model.js";
+import mongoose from "mongoose";
 import { JobApplicaiton } from "../../models/Employer.models/jobApplication.model.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { ApiResponce } from "../../utils/ApiResponce.js";
@@ -90,4 +90,24 @@ const getMyApplications = asyncHandler(async (req, res) => {
     );
 });
 // end of get my applications //
-export { postApplication, getMyApplications };
+
+// delete job applicaton //
+const deleteJobApplication = asyncHandler(async (req, res) => {
+    const jobApplicationId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(jobApplicationId)) {
+        throw new ApiError(400, "Invalid job application id");
+    }
+
+    const jobApplication =
+        await JobApplicaiton.findByIdAndDelete(jobApplicationId);
+
+    if (!jobApplication) {
+        throw new ApiError(400, "No job application found");
+    }
+    return res
+        .status(200)
+        .json(new ApiResponce(200, {}, "Job application deleted successfully"));
+});
+// end of delete job applicaton //
+export { postApplication, getMyApplications, deleteJobApplication };
