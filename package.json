@@ -15,7 +15,7 @@
         "mongodb",
         "cloudinary"
     ],
-    "author": "yashodhan,ayush,pundalik,vishwaved",
+    "author": "yashodhan,ayushamberkar03@gmail.com,pundalik,vishwaved",
     "license": "ISC",
     "dependencies": {
         "bcryptjs": "^2.4.3",
