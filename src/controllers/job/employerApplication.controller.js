@@ -78,15 +78,16 @@ const getMyApplications = asyncHandler(async (req, res) => {
         throw new ApiError(400, "No applications found");
     }
 
-    return res
-        .status(200)
-        .json(
-            new ApiResponce(
-                200,
-                { myApplications: myApplications },
-                "applications found",
-            ),
-        );
+    return res.status(200).json(
+        new ApiResponce(
+            200,
+            {
+                myApplications: myApplications,
+                total: myApplications.length,
+            },
+            "applications found",
+        ),
+    );
 });
 // end of get my applications //
 export { postApplication, getMyApplications };
