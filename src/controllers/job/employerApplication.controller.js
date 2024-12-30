@@ -70,4 +70,23 @@ const postApplication = asyncHandler(async (req, res) => {
 });
 // end of generate job application controller //
 
-export { postApplication };
+// get my applications //
+const getMyApplications = asyncHandler(async (req, res) => {
+    const myApplications = await JobApplicaiton.find({ owner: req.employer });
+
+    if (!myApplications) {
+        throw new ApiError(400, "No applications found");
+    }
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponce(
+                200,
+                { myApplications: myApplications },
+                "applications found",
+            ),
+        );
+});
+// end of get my applications //
+export { postApplication, getMyApplications };

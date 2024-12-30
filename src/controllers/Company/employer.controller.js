@@ -186,5 +186,34 @@ const loginEmployer = asyncHandler(async (req, res) => {
 /**
  * _______________END OF Login Employer _______________
  */
+/**
+ * _______________ LOG OUT EMPLOYER_______________
+ */
+const logOutEmployer = asyncHandler(async (req, res) => {
+    await Employer.findByIdAndUpdate(
+        req.employer?._id,
+        {
+            $set: {
+                refreshToken: undefined,
+            },
+        },
+        {
+            $new: true,
+        },
+    );
 
-export { createEmployer, loginEmployer };
+    const options = {
+        secure: true,
+        httpOnly: true,
+    };
+
+    return res
+        .status(200)
+        .clearCookie("accessTokenemp", options)
+        .clearCookie("refreshTokenemp", options)
+        .json(new ApiResponce(200, {}, "Employer log out successfully"));
+});
+/**
+ * _______________ END OF LOG OUT EMPLOYER_______________
+ */
+export { createEmployer, loginEmployer, logOutEmployer };
