@@ -177,7 +177,7 @@ const loginEmployer = asyncHandler(async (req, res) => {
                 {
                     employer: employerData,
                     accessToken,
-                    employerData,
+                    refreshToken,
                 },
                 "Login Successfully",
             ),
