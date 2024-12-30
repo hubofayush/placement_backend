@@ -5,10 +5,13 @@ import { JobApplicaiton } from "../../models/Employer.models/jobApplication.mode
 
 // get all aplications //
 const getAllApplications = asyncHandler(async (req, res) => {
-    const applications = await JobApplicaiton.find().select("-owner");
+    const applications = await JobApplicaiton.find({ status: "Active" }).select(
+        "-owner",
+    );
     if (!applications) {
         throw new ApiError(404, "No applications found");
     }
+
     return res
         .status(200)
         .json(new ApiResponce(200, applications, "All applications"));
