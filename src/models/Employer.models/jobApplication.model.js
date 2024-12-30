@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 // getting date //
 let a = new Date();
@@ -74,6 +75,8 @@ const jobApplicationSchema = new Schema(
     },
     { timestamps: true },
 );
+
+jobApplicationSchema.plugin(mongooseAggregatePaginate);
 
 export const JobApplicaiton = mongoose.model(
     "JobApplicaiton",
