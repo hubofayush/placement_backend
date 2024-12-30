@@ -37,6 +37,26 @@ const uploadOnCloudinary = async (localFilePath) => {
     }
 };
 
+const uploadOnCloudinaryPDF = async (localFilePath) => {
+    try {
+        if (!localFilePath) return null;
+        // ** upload file on cloudinary
+        const responce = await cloudinary.uploader.upload(localFilePath, {
+            resource_type: "auto",
+            format: "pdf",
+        });
+        //file has been uploaded successfully
+        // console.log("file uploaded on cloudinary", responce.url);
+        //
+        fs.unlinkSync(localFilePath); // unlik file path
+        return responce; // for user
+    } catch (error) {
+        console.log("error on cloudinary uploading :", error);
+        fs.unlinkSync(localFilePath); // will remove local saved file if upload file failed
+        return null;
+    }
+};
+
 /**
  * Deletes an image from Cloudinary.
  * @param {string} imageUrl - The URL of the image to be deleted.
@@ -74,4 +94,4 @@ const deleteImageOnCloudinary = async (imageUrl) => {
         return null;
     }
 };
-export { uploadOnCloudinary, deleteImageOnCloudinary };
+export { uploadOnCloudinary, deleteImageOnCloudinary, uploadOnCloudinaryPDF };

@@ -11,7 +11,10 @@ import {
 } from "../controllers/employee.controller.js";
 const router = Router();
 import { verifyJWT } from "../middlewares/auth.middleware.js";
-import { getAllApplications } from "../controllers/job/employeeApplication.controller.js";
+import {
+    getAllApplications,
+    postApplication,
+} from "../controllers/job/employeeApplication.controller.js";
 
 /**
  * INSECURED ROUTES
@@ -30,6 +33,12 @@ router.route("/logout").post(verifyJWT, logoutEmployee);
 router.route("/getUser").get(verifyJWT, getCurrentUser);
 router.route("/updateUser").patch(verifyJWT, updateEmployee);
 router.route("/updatePassword").patch(verifyJWT, updatePassword);
+
+// job application routes //
+router
+    .route("/job/:jobId")
+    .post(verifyJWT, upload.single("resume"), postApplication);
+// end of job application routes //
 /**
  *  END OF SECURED ROUTES
  */
