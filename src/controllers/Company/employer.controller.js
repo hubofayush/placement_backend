@@ -89,6 +89,10 @@ const createEmployer = asyncHandler(async (req, res) => {
         // Get the ID of the newly created employer
         const empId = newEmployer[0]._id;
 
+        if (!subscription) {
+            throw new ApiError(400, "subscription is required");
+        }
+
         // Prepare the subscription data
         const subscriptionData = {
             employer: empId,
