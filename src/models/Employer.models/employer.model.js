@@ -31,7 +31,7 @@ const EmployerSchema = new Schema(
         jobApplication: [
             {
                 type: Schema.Types.ObjectId,
-                ref: "JobApplicaiton",
+                ref: "JobApplication",
             },
         ],
         subscription: [

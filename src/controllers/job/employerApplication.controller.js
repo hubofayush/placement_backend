@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { JobApplicaiton } from "../../models/Employer.models/jobApplication.model.js";
+import { JobApplication } from "../../models/Employer.models/jobApplication.model.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { ApiResponce } from "../../utils/ApiResponce.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
@@ -38,7 +38,9 @@ const postApplication = asyncHandler(async (req, res) => {
         throw new ApiError(400, "all feilds are required");
     }
 
-    const newJob = await JobApplicaiton.create({
+    console.log(req.body);
+
+    const newJob = await JobApplication.create({
         companyName: req.employer?.name,
         title: title,
         closeDate: closeDate,
@@ -72,7 +74,7 @@ const postApplication = asyncHandler(async (req, res) => {
 
 // get my applications //
 const getMyApplications = asyncHandler(async (req, res) => {
-    const myApplications = await JobApplicaiton.find({ owner: req.employer });
+    const myApplications = await JobApplication.find({ owner: req.employer });
 
     if (!myApplications) {
         throw new ApiError(400, "No applications found");
@@ -100,7 +102,7 @@ const deleteJobApplication = asyncHandler(async (req, res) => {
     }
 
     const jobApplication =
-        await JobApplicaiton.findByIdAndDelete(jobApplicationId);
+        await JobApplication.findByIdAndDelete(jobApplicationId);
 
     if (!jobApplication) {
         throw new ApiError(400, "No job application found");

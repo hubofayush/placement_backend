@@ -1,7 +1,7 @@
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { ApiResponce } from "../../utils/ApiResponce.js";
-import { JobApplicaiton } from "../../models/Employer.models/jobApplication.model.js";
+import { JobApplication } from "../../models/Employer.models/jobApplication.model.js";
 import mongoose, { Mongoose } from "mongoose";
 import { Application } from "../../models/Employee.models/application.model.js";
 import { uploadOnCloudinaryPDF } from "../../utils/cloudinary.js";
@@ -15,7 +15,7 @@ const getAllApplications = asyncHandler(async (req, res) => {
     const sortStage = {};
     sortStage[sortBy] = sortType === "asc" ? 1 : -1;
 
-    const applications = await JobApplicaiton.find({ status: "Active" })
+    const applications = await JobApplication.find({ status: "Active" })
         .select("-owner")
         .sort(sortStage)
         .skip(pageSkip)
@@ -31,6 +31,7 @@ const getAllApplications = asyncHandler(async (req, res) => {
 // end of get all aplications //
 
 // post application for job //
+// TODO: cant post more than one application to a job application
 const postApplication = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
 
@@ -48,7 +49,7 @@ const postApplication = asyncHandler(async (req, res) => {
         throw new ApiError(400, "bid is required");
     }
 
-    const job = await JobApplicaiton.findById(jobId);
+    const job = await JobApplication.findById(jobId);
 
     if (!job) {
         throw new ApiError(404, "No job found");

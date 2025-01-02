@@ -489,7 +489,21 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 /**
  * _____END OF check current user________
  */
+/** TODO: search employer
+ * ________ SEARCH company name_______
+ */
+const searchCompany = asyncHandler(async (req, res) => {
+    const { cName } = req.params;
 
+    if (!cName) {
+        throw new ApiError(400, "Company name Required");
+    }
+
+    
+});
+/**
+ * ________ SEARCH company name_______
+ */
 /**
  * _________ Exporting functions ___________S
  */

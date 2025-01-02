@@ -51,6 +51,7 @@ const generateToken = async (id) => {
  *
  * @returns {Object} - Returns a success response with the newly created employer details.
  */
+// TODO: TAKE COMPANY LOGO AS WELL WHILE REGISTER
 const createEmployer = asyncHandler(async (req, res) => {
     // Destructure the required fields from the request body
     const { name, authorityName, password, email, location, subscription } =

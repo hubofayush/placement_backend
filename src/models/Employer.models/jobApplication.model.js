@@ -2,8 +2,8 @@ import mongoose, { Schema } from "mongoose";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 // getting date //
-let a = new Date();
-const date = `${a.getFullYear()}-${a.getMonth()}-${a.getDate()}`;
+const a = new Date();
+// const date = `${a.getFullYear()}-${a.getMonth()}-${a.getDate()}`;
 // end of getting date //
 
 const jobApplicationSchema = new Schema(
@@ -59,12 +59,12 @@ const jobApplicationSchema = new Schema(
         },
         reviewDate: {
             type: Date,
-            min: date,
+            min: a,
         },
         closeDate: {
             type: Date,
             required: true,
-            min: date,
+            min: a,
         },
         applications: [
             {
@@ -78,7 +78,7 @@ const jobApplicationSchema = new Schema(
 
 jobApplicationSchema.plugin(mongooseAggregatePaginate);
 
-export const JobApplicaiton = mongoose.model(
-    "JobApplicaiton",
+export const JobApplication = mongoose.model(
+    "JobApplication",
     jobApplicationSchema,
 );
