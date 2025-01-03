@@ -6,6 +6,7 @@ import {
     loginEmployee,
     logoutEmployee,
     Register,
+    searchCompany,
     updateEmployee,
     updatePassword,
 } from "../../controllers/Employee/employee.controller.js";

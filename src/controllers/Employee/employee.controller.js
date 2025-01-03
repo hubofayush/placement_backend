@@ -523,6 +523,7 @@ export {
     getCurrentUser,
     updateEmployee,
     updatePassword,
+    searchCompany,
 };
 /**
  * ____ END OF exprting function_________
