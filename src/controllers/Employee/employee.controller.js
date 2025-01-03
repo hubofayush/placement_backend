@@ -7,6 +7,7 @@ import mongoose from "mongoose";
 import { Location } from "../../models/location.model.js";
 import { Experience } from "../../models/Employee.models/experience.model.js";
 import { EmployeeSubscription } from "../../models/Employee.models/employeesSbscription.model.js";
+import { Employer } from "../../models/Employer.models/employer.model.js";
 // import jwt from "jsonwebtoken";
 
 /**
@@ -509,6 +510,65 @@ const searchCompany = asyncHandler(async (req, res) => {
     if (!cName) {
         throw new ApiError(400, "Company name Required");
     }
+
+    // const company = await Employer.find({
+    //     name: {
+    //         $regex: `${cName}`,
+    //         $options: "i",
+    //     },
+    // }).select("-password -refreshToken");
+
+    // aggrigation pipeline //
+    const company = await Employer.aggregate([
+        {
+            $match: {
+                name: `/${cName}/`,
+            },
+        },
+        {
+            $lookup: {
+                from: "jobapplications",
+                localField: "_id",
+                foreignField: "owner",
+                as: "applications",
+                pipeline: [
+                    {
+                        $match: {
+                            status: "Active",
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            $addFields: {
+                numberOfActive: {
+                    $size: "$applications",
+                },
+            },
+        },
+        {
+            $project: {
+                name: 1,
+                location: 1,
+                numberOfActive: 1,
+            },
+        },
+    ]);
+    // end of aggrigation pipeline //
+
+    if (!company) {
+        throw new ApiError(400, `NO RESULTS FOUND FOR ${cName}`);
+    }
+    return res
+        .status(200)
+        .json(
+            new ApiResponce(
+                200,
+                company,
+                "Company details found succsessfully",
+            ),
+        );
 });
 /**
  * ________ SEARCH company name_______

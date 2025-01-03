@@ -34,6 +34,7 @@ router.route("/logout").post(verifyJWT, logoutEmployee);
 router.route("/getUser").get(verifyJWT, getCurrentUser);
 router.route("/updateUser").patch(verifyJWT, updateEmployee);
 router.route("/updatePassword").patch(verifyJWT, updatePassword);
+router.route("/find/:cName").get(verifyJWT, searchCompany);
 
 // job application routes //
 router
