@@ -1,11 +1,12 @@
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { ApiError } from "../utils/ApiError.js";
-import { ApiResponce } from "../utils/ApiResponce.js";
-import { Employee } from "../models/Employee.models/employee.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { asyncHandler } from "../../utils/asyncHandler.js";
+import { ApiError } from "../../utils/ApiError.js";
+import { ApiResponce } from "../../utils/ApiResponce.js";
+import { Employee } from "../../models/Employee.models/employee.model.js";
+import { uploadOnCloudinary } from "../../utils/cloudinary.js";
 import mongoose from "mongoose";
-import { Location } from "../models/location.model.js";
-import { Experience } from "../models/Employee.models/experience.model.js";
+import { Location } from "../../models/location.model.js";
+import { Experience } from "../../models/Employee.models/experience.model.js";
+import { EmployeeSubscription } from "../../models/Employee.models/employeesSbscription.model.js";
 // import jwt from "jsonwebtoken";
 
 /**
@@ -233,14 +234,24 @@ const Register = asyncHandler(async (req, res) => {
         };
         // Create location records with references to employee //
 
+        // create subscription data //
+        const subscriptionData = {
+            employee: empId,
+            subscriptionType: "free",
+        };
+        // end of create subscription data //
+
         // Create experience,location records with references to employee //
-        const [experienceRecords, locationRecords] = await Promise.all([
-            Experience.insertMany(experienceData, { session }),
-            Location.insertMany(locationData, { session }),
-        ]);
+        const [experienceRecords, locationRecords, subscriptionRecords] =
+            await Promise.all([
+                Experience.insertMany(experienceData, { session }),
+                Location.insertMany(locationData, { session }),
+                EmployeeSubscription.insertMany(subscriptionData, { session }),
+            ]);
 
         newEmployee[0].workExperience = experienceRecords.map((exp) => exp._id);
         newEmployee[0].location = locationRecords.map((loc) => loc._id);
+        newEmployee[0].subscription = subscriptionRecords.map((sub) => sub._id);
         await newEmployee[0].save({ session });
 
         // Create experience,location records with references to employee //
@@ -498,8 +509,6 @@ const searchCompany = asyncHandler(async (req, res) => {
     if (!cName) {
         throw new ApiError(400, "Company name Required");
     }
-
-    
 });
 /**
  * ________ SEARCH company name_______

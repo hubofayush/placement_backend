@@ -22,7 +22,7 @@ import sendOtpRouter from "./routes/sendOTP.Routes.js";
 //**________END OF SATNDARD ROUTES______________ */
 
 //**________EMPLOYEE ROUTES______________ */
-import employeeRouter from "./routes/employee.routes.js";
+import employeeRouter from "./routes/EmployeeRoutes/employee.routes.js";
 //**________END OF EMPLOYEE ROUTES______________ */
 
 // **_______EMPLOYER ROUTES_____________*/

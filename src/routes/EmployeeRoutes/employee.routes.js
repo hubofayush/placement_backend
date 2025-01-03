@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { upload } from "../middlewares/multer.middleware.js";
+import { upload } from "../../middlewares/multer.middleware.js";
 import {
     getCurrentUser,
     loginEmployee,
@@ -8,13 +8,13 @@ import {
     Register,
     updateEmployee,
     updatePassword,
-} from "../controllers/employee.controller.js";
+} from "../../controllers/Employee/employee.controller.js";
 const router = Router();
-import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { verifyJWT } from "../../middlewares/auth.middleware.js";
 import {
     getAllApplications,
     postApplication,
-} from "../controllers/job/employeeApplication.controller.js";
+} from "../../controllers/job/employeeApplication.controller.js";
 
 /**
  * INSECURED ROUTES
