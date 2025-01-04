@@ -506,8 +506,13 @@ const getCurrentUser = asyncHandler(async (req, res) => {
  * ________ SEARCH company name_______
  */
 const search = asyncHandler(async (req, res) => {
-    const { q } = req.query;
+    const { q, limit = 10, page = 1, sortBy, sortType } = req.query;
 
+    const parseLimit = parseInt(limit);
+    const pageSkip = (page - 1) * parseLimit;
+    const sortStage = {};
+    sortStage[sortBy] = sortType === "asc" ? 1 : -1;
+    console.log(sortStage);
     if (!q) {
         throw new ApiError(400, "Company name Required");
     }
@@ -560,6 +565,15 @@ const search = asyncHandler(async (req, res) => {
                 location: 1,
                 numberOfActive: 1,
             },
+        },
+        {
+            $limit: parseLimit,
+        },
+        {
+            $skip: pageSkip,
+        },
+        {
+            $sort: sortStage,
         },
     ]);
     // end of aggrigation pipeline for finding company//
@@ -614,6 +628,15 @@ const search = asyncHandler(async (req, res) => {
                 companyName: 1,
                 closeDate: 1,
             },
+        },
+        {
+            $limit: parseLimit,
+        },
+        {
+            $skip: pageSkip,
+        },
+        {
+            $sort: sortStage,
         },
     ]);
     // end of finding job applications realted to search //
