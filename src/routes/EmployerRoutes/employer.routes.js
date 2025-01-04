@@ -9,6 +9,7 @@ import {
     deleteJobApplication,
     getMyApplications,
     postApplication,
+    updateJobApplication,
 } from "../../controllers/job/employerApplication.controller.js";
 import { verifyJWTEmployer } from "../../middlewares/auth.middleware.js";
 
@@ -28,7 +29,8 @@ router.route("/job").get(verifyJWTEmployer, getMyApplications);
 router
     .route("/job/:id")
     .delete(verifyJWTEmployer, deleteJobApplication)
-    .patch(verifyJWTEmployer, changeJobStatus);
+    .patch(verifyJWTEmployer, updateJobApplication);
+router.route("/job/toggle/:id").patch(verifyJWTEmployer, changeJobStatus);
 // job application routes //
 
 // end of validation routes //

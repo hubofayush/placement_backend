@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import { JobApplication } from "../../models/Employer.models/jobApplication.model.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { ApiResponce } from "../../utils/ApiResponce.js";
@@ -115,7 +115,75 @@ const deleteJobApplication = asyncHandler(async (req, res) => {
 // end of delete job applicaton //
 
 // update job application //
-const updateJobApplication = asyncHandler(async (req, res) => {});
+const updateJobApplication = asyncHandler(async (req, res) => {
+    const {
+        title,
+        description,
+        openings,
+        location,
+        salaryRange,
+        jobType,
+        qualification,
+        jobHours,
+        instructions,
+        contactInfo,
+        reviewDate,
+        closeDate,
+    } = req.body;
+
+    const jobId = req.params.id;
+    if (!jobId) {
+        throw new ApiError(400, "Job Id required");
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+        throw new ApiError(400, "invalid job applicaiton id");
+    }
+
+    const oldJobApplication = await JobApplication.findById(jobId);
+    if (!oldJobApplication) {
+        throw new ApiError(400, "No job application found");
+    }
+
+    const jobApplicationData = {
+        title: title ?? oldJobApplication.title,
+        description: description ?? oldJobApplication.description,
+        openings: openings ?? oldJobApplication.openings,
+        location: location ?? oldJobApplication.location,
+        salaryRange: salaryRange ?? oldJobApplication.salaryRange,
+        jobType: jobType ?? oldJobApplication.jobType,
+        qualification: qualification ?? oldJobApplication.qualification,
+        jobHours: jobHours ?? oldJobApplication.jobHours,
+        instructions: instructions ?? oldJobApplication.instructions,
+        contactInfo: contactInfo ?? oldJobApplication.contactInfo,
+        reviewDate: reviewDate ?? oldJobApplication.reviewDate,
+        closeDate: closeDate ?? oldJobApplication.closeDate,
+    };
+
+    const updatedJobApplication = await JobApplication.findByIdAndUpdate(
+        jobId,
+        {
+            $set: jobApplicationData,
+        },
+        {
+            new: true,
+        },
+    );
+
+    if (!updatedJobApplication) {
+        throw new ApiError(400, "Cant update job application");
+    }
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponce(
+                200,
+                updatedJobApplication,
+                "Application updated successfully",
+            ),
+        );
+});
 // update job application //
 
 // toggle job status //
@@ -160,4 +228,5 @@ export {
     getMyApplications,
     deleteJobApplication,
     changeJobStatus,
+    updateJobApplication,
 };
