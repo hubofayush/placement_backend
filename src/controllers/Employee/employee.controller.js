@@ -8,6 +8,7 @@ import { Location } from "../../models/location.model.js";
 import { Experience } from "../../models/Employee.models/experience.model.js";
 import { EmployeeSubscription } from "../../models/Employee.models/employeesSbscription.model.js";
 import { Employer } from "../../models/Employer.models/employer.model.js";
+import { JobApplication } from "../../models/Employer.models/jobApplication.model.js";
 // import jwt from "jsonwebtoken";
 
 /**
@@ -501,13 +502,14 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 /**
  * _____END OF check current user________
  */
-/** TODO: search employer
+/**
  * ________ SEARCH company name_______
+ * TODO: change this to search feild for anything
  */
-const searchCompany = asyncHandler(async (req, res) => {
-    const { cName } = req.params;
+const search = asyncHandler(async (req, res) => {
+    const { q } = req.query;
 
-    if (!cName) {
+    if (!q) {
         throw new ApiError(400, "Company name Required");
     }
 
@@ -518,11 +520,24 @@ const searchCompany = asyncHandler(async (req, res) => {
     //     },
     // }).select("-password -refreshToken");
 
-    // aggrigation pipeline //
+    // aggrigation pipeline for finding company//
     const company = await Employer.aggregate([
         {
             $match: {
-                name: `/${cName}/`,
+                $or: [
+                    {
+                        name: {
+                            $regex: `${q}`,
+                            $options: "i",
+                        },
+                    },
+                    {
+                        location: {
+                            $regex: `${q}`,
+                            $options: "i",
+                        },
+                    },
+                ],
             },
         },
         {
@@ -555,20 +570,103 @@ const searchCompany = asyncHandler(async (req, res) => {
             },
         },
     ]);
-    // end of aggrigation pipeline //
+    // end of aggrigation pipeline for finding company//
+    // if (!company) {
+    //     throw new ApiError(400, `NO RESULTS FOUND FOR ${cName}`);
+    // }
 
-    if (!company) {
-        throw new ApiError(400, `NO RESULTS FOUND FOR ${cName}`);
-    }
-    return res
-        .status(200)
-        .json(
-            new ApiResponce(
-                200,
-                company,
-                "Company details found succsessfully",
-            ),
-        );
+    // finding job applications realted to search //
+    // const jobApplications = await JobApplication.find({
+    //     $and: [
+    //         {
+    //             status: "Active",
+    //         },
+    //     ],
+    //     $or: [
+    //         {
+    //             title: {
+    //                 $regex: `${q}`,
+    //                 $options: "i",
+    //             },
+    //         },
+    //         {
+    //             companyName: {
+    //                 $regex: `${q}`,
+    //                 $options: "i",
+    //             },
+    //         },
+    //         {
+    //             qualification: {
+    //                 $regex: `${q}`,
+    //                 $options: "i",
+    //             },
+    //         },
+    //         {
+    //             location: {
+    //                 $regex: `${q}`,
+    //                 $options: "i",
+    //             },
+    //         },
+    //     ],
+    // }).select("title companyName salaryRange qualification closeDate");
+
+    const jobApplications = await JobApplication.aggregate([
+        {
+            $match: {
+                $or: [
+                    {
+                        title: {
+                            $regex: `${q}`,
+                            $options: "i",
+                        },
+                    },
+
+                    {
+                        companyName: {
+                            $regex: `${q}`,
+                            $options: "i",
+                        },
+                    },
+
+                    {
+                        qualification: {
+                            $regex: `${q}`,
+                            $options: "i",
+                        },
+                    },
+
+                    {
+                        location: {
+                            $regex: `${q}`,
+                            $options: "i",
+                        },
+                    },
+                ],
+                status: "Active",
+            },
+        },
+        {
+            $project: {
+                title: 1,
+                location: 1,
+                salaryRange: 1,
+                qualification: 1,
+                companyName: 1,
+                closeDate: 1,
+            },
+        },
+    ]);
+    // end of finding job applications realted to search //
+    return res.status(200).json(
+        new ApiResponce(
+            200,
+            {
+                company: company,
+                jobApplications: jobApplications,
+            },
+            "Company details found succsessfully",
+        ),
+    );
 });
 /**
  * ________ SEARCH company name_______
@@ -583,7 +681,7 @@ export {
     getCurrentUser,
     updateEmployee,
     updatePassword,
-    searchCompany,
+    search,
 };
 /**
  * ____ END OF exprting function_________

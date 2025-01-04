@@ -17,7 +17,10 @@ const jobApplicationSchema = new Schema(
         },
         status: {
             type: String,
-            default: "Active",
+            enum: {
+                values: ["Active", "Close"],
+                message: "{VALUE} not supported ",
+            },
         },
         title: {
             type: String,

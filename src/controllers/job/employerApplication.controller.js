@@ -54,6 +54,7 @@ const postApplication = asyncHandler(async (req, res) => {
         instructions: instructions,
         qualification: qualification,
         contactInfo: contactInfo,
+        status: status,
     });
 
     if (!newJob) {
