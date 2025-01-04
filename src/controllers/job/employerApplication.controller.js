@@ -7,7 +7,7 @@ import { asyncHandler } from "../../utils/asyncHandler.js";
 // generate job application controller //
 const postApplication = asyncHandler(async (req, res) => {
     const {
-        status,
+        active,
         title,
         description,
         openings,
@@ -54,7 +54,7 @@ const postApplication = asyncHandler(async (req, res) => {
         instructions: instructions,
         qualification: qualification,
         contactInfo: contactInfo,
-        status: status,
+        active: active,
     });
 
     if (!newJob) {
@@ -113,4 +113,13 @@ const deleteJobApplication = asyncHandler(async (req, res) => {
         .json(new ApiResponce(200, {}, "Job application deleted successfully"));
 });
 // end of delete job applicaton //
+
+// update job application //
+const updateJobApplication = asyncHandler(async (req, res) => {});
+// update job application //
+
+// toggle job status //
+const changeJobStatus = asyncHandler(async (req, res) => {});
+// toggle job status //
+
 export { postApplication, getMyApplications, deleteJobApplication };

@@ -541,7 +541,7 @@ const search = asyncHandler(async (req, res) => {
                 pipeline: [
                     {
                         $match: {
-                            status: "Active",
+                            active: true,
                         },
                     },
                 ],
@@ -596,7 +596,7 @@ const search = asyncHandler(async (req, res) => {
                         },
                     },
                 ],
-                status: "Active",
+                active: true,
             },
         },
         {

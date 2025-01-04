@@ -15,7 +15,7 @@ const getAllApplications = asyncHandler(async (req, res) => {
     const sortStage = {};
     sortStage[sortBy] = sortType === "asc" ? 1 : -1;
 
-    const applications = await JobApplication.find({ status: "Active" })
+    const applications = await JobApplication.find({ active: true })
         .select("-owner")
         .sort(sortStage)
         .skip(pageSkip)

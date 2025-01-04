@@ -15,12 +15,9 @@ const jobApplicationSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "Employer",
         },
-        status: {
-            type: String,
-            enum: {
-                values: ["Active", "Close"],
-                message: "{VALUE} not supported ",
-            },
+        active: {
+            type: Boolean,
+            default: true,
         },
         title: {
             type: String,
