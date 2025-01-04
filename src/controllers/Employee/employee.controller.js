@@ -504,7 +504,6 @@ const getCurrentUser = asyncHandler(async (req, res) => {
  */
 /**
  * ________ SEARCH company name_______
- * TODO: change this to search feild for anything
  */
 const search = asyncHandler(async (req, res) => {
     const { q } = req.query;
@@ -512,13 +511,6 @@ const search = asyncHandler(async (req, res) => {
     if (!q) {
         throw new ApiError(400, "Company name Required");
     }
-
-    // const company = await Employer.find({
-    //     name: {
-    //         $regex: `${cName}`,
-    //         $options: "i",
-    //     },
-    // }).select("-password -refreshToken");
 
     // aggrigation pipeline for finding company//
     const company = await Employer.aggregate([
@@ -571,44 +563,6 @@ const search = asyncHandler(async (req, res) => {
         },
     ]);
     // end of aggrigation pipeline for finding company//
-    // if (!company) {
-    //     throw new ApiError(400, `NO RESULTS FOUND FOR ${cName}`);
-    // }
-
-    // finding job applications realted to search //
-    // const jobApplications = await JobApplication.find({
-    //     $and: [
-    //         {
-    //             status: "Active",
-    //         },
-    //     ],
-    //     $or: [
-    //         {
-    //             title: {
-    //                 $regex: `${q}`,
-    //                 $options: "i",
-    //             },
-    //         },
-    //         {
-    //             companyName: {
-    //                 $regex: `${q}`,
-    //                 $options: "i",
-    //             },
-    //         },
-    //         {
-    //             qualification: {
-    //                 $regex: `${q}`,
-    //                 $options: "i",
-    //             },
-    //         },
-    //         {
-    //             location: {
-    //                 $regex: `${q}`,
-    //                 $options: "i",
-    //             },
-    //         },
-    //     ],
-    // }).select("title companyName salaryRange qualification closeDate");
 
     const jobApplications = await JobApplication.aggregate([
         {
