@@ -5,6 +5,7 @@ import {
     logOutEmployer,
 } from "../../controllers/Company/employer.controller.js";
 import {
+    changeJobStatus,
     deleteJobApplication,
     getMyApplications,
     postApplication,
@@ -24,7 +25,10 @@ router.route("/logout").get(verifyJWTEmployer, logOutEmployer);
 // job application routes //
 router.route("/job").post(verifyJWTEmployer, postApplication);
 router.route("/job").get(verifyJWTEmployer, getMyApplications);
-router.route("/job/:id").delete(deleteJobApplication);
+router
+    .route("/job/:id")
+    .delete(verifyJWTEmployer, deleteJobApplication)
+    .patch(verifyJWTEmployer, changeJobStatus);
 // job application routes //
 
 // end of validation routes //

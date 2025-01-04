@@ -119,7 +119,45 @@ const updateJobApplication = asyncHandler(async (req, res) => {});
 // update job application //
 
 // toggle job status //
-const changeJobStatus = asyncHandler(async (req, res) => {});
+const changeJobStatus = asyncHandler(async (req, res) => {
+    const jobId = req.params.id;
+
+    if (!jobId) {
+        throw new ApiError(400, "Job application id required");
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+        throw new ApiError(400, "invalid jobapplication id");
+    }
+
+    const newjobApplication = await JobApplication.findById(jobId);
+
+    if (!newjobApplication) {
+        throw new ApiError(400, "invalid job ID, Job application not found");
+    }
+
+    if (!newjobApplication.owner.equals(req.employer?._id)) {
+        throw new ApiError(400, "Invalid access , access denied");
+    }
+
+    newjobApplication.active = !newjobApplication.active;
+    newjobApplication.save({ validateBeforeSave: false });
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponce(
+                200,
+                newjobApplication,
+                "Status changed successfully",
+            ),
+        );
+});
 // toggle job status //
 
-export { postApplication, getMyApplications, deleteJobApplication };
+export {
+    postApplication,
+    getMyApplications,
+    deleteJobApplication,
+    changeJobStatus,
+};

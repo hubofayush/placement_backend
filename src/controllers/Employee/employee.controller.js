@@ -595,6 +595,12 @@ const search = asyncHandler(async (req, res) => {
                             $options: "i",
                         },
                     },
+                    {
+                        salaryRange: {
+                            $regex: `${q}`,
+                            $options: "i",
+                        },
+                    },
                 ],
                 active: true,
             },
