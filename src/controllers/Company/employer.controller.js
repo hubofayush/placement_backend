@@ -4,6 +4,7 @@ import { ApiResponce } from "../../utils/ApiResponce.js";
 import { Employer } from "../../models/Employer.models/employer.model.js";
 import { EmployerSubscription } from "../../models/Employer.models/employerSubscription.model.js";
 import mongoose from "mongoose";
+import { uploadOnCloudinary } from "../../utils/cloudinary.js";
 
 /**
  * ________________ Generate Token _____________
@@ -54,8 +55,15 @@ const generateToken = async (id) => {
 // TODO: TAKE COMPANY LOGO AS WELL WHILE REGISTER
 const createEmployer = asyncHandler(async (req, res) => {
     // Destructure the required fields from the request body
-    const { name, authorityName, password, email, location, subscription } =
-        req.body;
+    const {
+        name,
+        authorityName,
+        password,
+        email,
+        location,
+        subscription,
+        logo,
+    } = req.body;
 
     // Check if any required fields are missing and throw an error if so
     if (!name || !authorityName || !password || !email || !location) {
@@ -67,6 +75,20 @@ const createEmployer = asyncHandler(async (req, res) => {
     if (oldEmployer) {
         throw new ApiError(400, "email Already registered");
     }
+
+    // upload logo on cloudinary //
+    const logoFile = req.file?.path;
+
+    const logoLocalPath = logoFile;
+    if (!logoLocalPath) {
+        throw new ApiError(400, "logo required");
+    }
+
+    const logoImage = await uploadOnCloudinary(logoLocalPath);
+    if (!logoImage) {
+        throw new ApiError(400, "Logo failed upload on cloudinary");
+    }
+    // end of upload logo on cloudinary //
 
     // Start a new MongoDB session and transaction
     const session = await mongoose.startSession();
@@ -82,6 +104,7 @@ const createEmployer = asyncHandler(async (req, res) => {
                     location: location,
                     password: password,
                     email: email,
+                    logo: logoImage?.url,
                 },
             ],
             { session },

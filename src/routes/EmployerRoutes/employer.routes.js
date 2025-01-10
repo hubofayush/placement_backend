@@ -12,11 +12,12 @@ import {
     updateJobApplication,
 } from "../../controllers/job/employerApplication.controller.js";
 import { verifyJWTEmployer } from "../../middlewares/auth.middleware.js";
+import { upload } from "../../middlewares/multer.middleware.js";
 
 const router = express.Router();
 
 // simpler roueters //
-router.route("/register").post(createEmployer);
+router.route("/register").post(upload.single("logo"), createEmployer);
 router.route("/login").post(loginEmployer);
 // end of  simpler roueters //
 

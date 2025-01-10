@@ -52,6 +52,9 @@ const EmployerSchema = new Schema(
         refreshToken: {
             type: String,
         },
+        logo: {
+            type: String,
+        },
     },
     { timestamps: true },
 );
