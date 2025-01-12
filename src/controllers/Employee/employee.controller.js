@@ -326,9 +326,78 @@ const loginEmployee = asyncHandler(async (req, res) => {
     // end of generating tolens by id //
 
     // getting new employee with refresh token //
-    const employeeReturn = await Employee.findById(findEmployee._id).select(
-        "-password -refreshToken",
-    );
+    // const employeeReturn = await Employee.findById(findEmployee._id).select(
+    //     "-password -refreshToken",
+    // );
+    const employeeReturn = await Employee.aggregate([
+        {
+            $match: {
+                _id: findEmployee?._id,
+            },
+        },
+        {
+            $lookup: {
+                from: "locations",
+                localField: "location",
+                foreignField: "_id",
+                as: "locations",
+                pipeline: [
+                    {
+                        $project: {
+                            state: 1,
+                            district: 1,
+                            subDistrict: 1,
+                            pincode: 1,
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            $lookup: {
+                from: "experiences",
+                localField: "workExperience",
+                foreignField: "_id",
+                as: "experiences",
+                pipeline: [
+                    {
+                        $project: {
+                            yearOfExperience: 1,
+                            working: 1,
+                            salary: 1,
+                            jobRole: 1,
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            $lookup: {
+                from: "employeeSubscriptions",
+                localField: "subscription",
+                foreignField: "_id",
+                as: "sunscriptions",
+            },
+        },
+        {
+            $project: {
+                _id: 1,
+                fName: 1,
+                lName: 1,
+                phone: 1,
+                age: 1,
+                dateOfBirth: 1,
+                gender: 1,
+                email: 1,
+                avatar: 1,
+                leades: 1,
+                education: 1,
+                locations: 1,
+                experiences: 1,
+                subscriptions: 1,
+            },
+        },
+    ]);
     // getting new employee with refresh token //
 
     // setting options for cookies //

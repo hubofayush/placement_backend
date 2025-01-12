@@ -21,9 +21,81 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
         ); // decoding the tokens //
 
         // finnding users from decoded token id //
-        const employee = await Employee.findById(decodedToken?._id).select(
-            "-password -refreshToken",
-        );
+        // const employee = await Employee.findById(decodedToken?._id).select(
+        //     "-password -refreshToken",
+        // );
+
+        // aggregatjion pipeline //
+        const employee = await Employee.aggregate([
+            {
+                $match: {
+                    _id: decodedToken?._id,
+                },
+            },
+            {
+                $lookup: {
+                    from: "locations",
+                    localField: "location",
+                    foreignField: "_id",
+                    as: "locations",
+                    pipeline: [
+                        {
+                            $project: {
+                                state: 1,
+                                district: 1,
+                                subDistrict: 1,
+                                pincode: 1,
+                            },
+                        },
+                    ],
+                },
+            },
+            {
+                $lookup: {
+                    from: "experiences",
+                    localField: "workExperience",
+                    foreignField: "_id",
+                    as: "experiences",
+                    pipeline: [
+                        {
+                            $project: {
+                                yearOfExperience: 1,
+                                working: 1,
+                                salary: 1,
+                                jobRole: 1,
+                            },
+                        },
+                    ],
+                },
+            },
+            {
+                $lookup: {
+                    from: "employeeSubscriptions",
+                    localField: "subscription",
+                    foreignField: "_id",
+                    as: "sunscriptions",
+                },
+            },
+            {
+                $project: {
+                    _id: 1,
+                    fName: 1,
+                    lName: 1,
+                    phone: 1,
+                    age: 1,
+                    dateOfBirth: 1,
+                    gender: 1,
+                    email: 1,
+                    avatar: 1,
+                    leades: 1,
+                    education: 1,
+                    locations: 1,
+                    experiences: 1,
+                    subscriptions: 1,
+                },
+            },
+        ]);
+        // aggregatjion pipeline //
 
         if (!employee) {
             throw new ApiError(
@@ -33,6 +105,7 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
         }
 
         req.employee = employee; // fetched user info is set as coockies
+        console.log(req.employee);
         next(); // next midddleware
     } catch (error) {
         throw new ApiError(401, error?.message || "invalid access token");
