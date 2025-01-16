@@ -572,7 +572,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
  * _____END OF check current user________
  */
 /**
- * ________ SEARCH company name_______
+ * ________ SEARCH _______
  */
 const search = asyncHandler(async (req, res) => {
     const { q, limit = 10, page = 1, sortBy, sortType } = req.query;
@@ -721,7 +721,61 @@ const search = asyncHandler(async (req, res) => {
     );
 });
 /**
- * ________ SEARCH company name_______
+ * ________ SEARCH _______
+ */
+/**
+ * ____________View Company Profile_________
+ */
+const viewCompany = asyncHandler(async (req, res) => {
+    const { companyId } = req.params;
+    if (!companyId) {
+        throw new ApiError(400, "Company Id required");
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(companyId)) {
+        throw new ApiError(400, "Wrong id");
+    }
+
+    const company = await Employer.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(companyId),
+            },
+        },
+        {
+            $lookup: {
+                from: "jobapplications",
+                localField: "_id",
+                foreignField: "owner",
+                as: "applications",
+                pipeline: [
+                    {
+                        $match: {
+                            active: true,
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            $project: {
+                name: 1,
+                location: 1,
+                email: 1,
+                applications: 1,
+                logo: 1,
+            },
+        },
+    ]);
+
+    if (company.length === 0) {
+        throw new ApiError(400, "Invalid Id, Company Not Found");
+    }
+
+    return res.status(200).json(new ApiResponce(200, company, "Company Found"));
+});
+/**
+ * ____________ END OF View Company Profile_________
  */
 /**
  * _________ Exporting functions ___________S
@@ -734,6 +788,7 @@ export {
     updateEmployee,
     updatePassword,
     search,
+    viewCompany,
 };
 /**
  * ____ END OF exprting function_________
