@@ -5,6 +5,7 @@ import { Employer } from "../../models/Employer.models/employer.model.js";
 import { EmployerSubscription } from "../../models/Employer.models/employerSubscription.model.js";
 import mongoose from "mongoose";
 import { uploadOnCloudinary } from "../../utils/cloudinary.js";
+import { Employee } from "../../models/Employee.models/employee.model.js";
 
 /**
  * ________________ Generate Token _____________
@@ -52,7 +53,7 @@ const generateToken = async (id) => {
  *
  * @returns {Object} - Returns a success response with the newly created employer details.
  */
-// TODO: TAKE COMPANY LOGO AS WELL WHILE REGISTER
+
 const createEmployer = asyncHandler(async (req, res) => {
     // Destructure the required fields from the request body
     const {
@@ -240,4 +241,77 @@ const logOutEmployer = asyncHandler(async (req, res) => {
 /**
  * _______________ END OF LOG OUT EMPLOYER_______________
  */
-export { createEmployer, loginEmployer, logOutEmployer };
+
+/**
+ * __________ VIEW EMPLOYEE PROFILE ______________
+ */
+const viewProfile = asyncHandler(async (req, res) => {
+    const { empId } = req.params;
+
+    if (!empId) {
+        throw new ApiError(400, "Employee ID required");
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(empId)) {
+        throw new ApiError(400, "Wrong ID");
+    }
+
+    const employee = await Employee.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(empId),
+            },
+        },
+        {
+            $lookup: {
+                from: "experiences",
+                localField: "_id",
+                foreignField: "employee",
+                as: "experience",
+            },
+        },
+        {
+            $lookup: {
+                from: "locations",
+                localField: "location",
+                foreignField: "_id",
+                as: "currentLocation",
+                pipeline: [
+                    {
+                        $project: {
+                            state: 1,
+                            district: 1,
+                            subDistrict: 1,
+                            pincode: 1,
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            $project: {
+                fName: 1,
+                lName: 1,
+                phone: 1,
+                age: 1,
+                education: 1,
+                experience: 1,
+                gender: 1,
+                avatar: 1,
+                currentLocation: 1,
+            },
+        },
+    ]);
+
+    if (employee.length === 0) {
+        throw new ApiError(400, "Invalid ID, please try again");
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponce(200, employee, "Employee Found"));
+});
+/**
+ * __________ END OF VIEW EMPLOYEE PROFILE ______________
+ */
+export { createEmployer, loginEmployer, logOutEmployer, viewProfile };

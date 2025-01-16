@@ -3,6 +3,7 @@ import {
     createEmployer,
     loginEmployer,
     logOutEmployer,
+    viewProfile,
 } from "../../controllers/Company/employer.controller.js";
 import {
     changeJobStatus,
@@ -23,6 +24,7 @@ router.route("/login").post(loginEmployer);
 
 // validation routes //
 router.route("/logout").get(verifyJWTEmployer, logOutEmployer);
+router.route("/viewEmployee/:empId").get(verifyJWTEmployer, viewProfile);
 
 // job application routes //
 router.route("/job").post(verifyJWTEmployer, postApplication);
