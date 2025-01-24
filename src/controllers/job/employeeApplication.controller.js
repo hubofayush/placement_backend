@@ -64,9 +64,9 @@ const postApplication = asyncHandler(async (req, res) => {
     if (!resume) {
         throw new ApiError(400, "Resume upload failed on cloudinary");
     }
-
+    // console.log(req.employee);
     const newApplication = await Application.create({
-        employee: req.employee._id,
+        employee: new mongoose.Types.ObjectId(req.employee?._id),
         bid: bid,
         resume: resume.secure_url,
         jobApplication: jobId,

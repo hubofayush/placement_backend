@@ -223,10 +223,67 @@ const changeJobStatus = asyncHandler(async (req, res) => {
 });
 // toggle job status //
 
+
+
+// view job request applications //
+const viewJobApplicationsRequests = asyncHandler(async (req, res) => {
+    const jobId = req.params.id;
+    if (!jobId) {
+        throw new ApiError(400, "Job application id required");
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+        throw new ApiError(400, "invalid jobapplication id");
+    }
+
+    const jobApplicationRequests = await JobApplication.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(jobId),
+            },
+        },
+        {
+            $lookup: {
+                from: "applications",
+                localField: "_id",
+                foreignField: "jobApplication",
+                as: "applications",
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "employees",
+                            localField: `employee`,
+                            foreignField: "_id",
+                            as: "employees",
+                        },
+                    },
+                ],
+            },
+        },
+    ]);
+
+    if (jobApplicationRequests.length === 0) {
+        throw new ApiError(400, "No job application found");
+    }
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponce(
+                200,
+                jobApplicationRequests,
+                "Job application found successfully",
+            ),
+        );
+});
+
+// end of view job request applications //
+
 export {
     postApplication,
     getMyApplications,
     deleteJobApplication,
     changeJobStatus,
     updateJobApplication,
+    viewJobApplicationsRequests,
 };

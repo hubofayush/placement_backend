@@ -3,6 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { Employee } from "../models/Employee.models/employee.model.js";
 import { Employer } from "../models/Employer.models/employer.model.js";
+import mongoose from "mongoose";
 
 export const verifyJWT = asyncHandler(async (req, res, next) => {
     try {
@@ -26,10 +27,11 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
         // );
 
         // aggregatjion pipeline //
+
         const employee = await Employee.aggregate([
             {
                 $match: {
-                    _id: decodedToken?._id,
+                    _id: new mongoose.Types.ObjectId(decodedToken?._id),
                 },
             },
             {
@@ -97,7 +99,7 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
         ]);
         // aggregatjion pipeline //
 
-        if (!employee) {
+        if (employee.length === 0) {
             throw new ApiError(
                 401,
                 "invaid user,please login again or create account",
@@ -105,7 +107,7 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
         }
 
         req.employee = employee; // fetched user info is set as coockies
-        console.log(req.employee);
+
         next(); // next midddleware
     } catch (error) {
         throw new ApiError(401, error?.message || "invalid access token");

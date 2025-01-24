@@ -6,9 +6,11 @@ const applicationSchema = new Schema(
         employee: {
             type: Schema.Types.ObjectId,
             ref: "Employee",
+            required: true,
         },
         bid: {
             type: String,
+            required: true,
         },
         resume: {
             type: String,
