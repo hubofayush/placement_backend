@@ -142,9 +142,9 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
                 "invaid user,please login again or create account",
             );
         }
-        console.log(employee);
+        // console.log(employee);
         req.employee = employee; // fetched user info is set as coockies
-        console.log(req.employee);
+        // console.log(req.employee);
 
         next(); // next midddleware
     } catch (error) {

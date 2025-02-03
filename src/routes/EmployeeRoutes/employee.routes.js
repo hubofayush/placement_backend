@@ -16,6 +16,7 @@ import { verifyJWT } from "../../middlewares/auth.middleware.js";
 import {
     getAllApplications,
     postApplication,
+    viewJobApplication,
 } from "../../controllers/job/employeeApplication.controller.js";
 
 /**
@@ -41,7 +42,8 @@ router.route("/search/company/:companyId").get(verifyJWT, viewCompany);
 // job application routes //
 router
     .route("/job/:jobId")
-    .post(verifyJWT, upload.single("resume"), postApplication);
+    .post(verifyJWT, upload.single("resume"), postApplication)
+    .get(verifyJWT, viewJobApplication);
 // end of job application routes //
 /**
  *  END OF SECURED ROUTES

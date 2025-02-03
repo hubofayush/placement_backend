@@ -104,19 +104,55 @@ const viewJobApplication = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid Id");
     }
 
-    const newJobApplication =
-        await JobApplication.findById(jobId).select("-active -owner ");
+    // const newJobApplication =
+    //     await JobApplication.findById(jobId).select("-active -owner ");
 
-    if (!newJobApplication) {
+    const newJobApplication = await JobApplication.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(jobId),
+            },
+        },
+
+        {
+            $lookup: {
+                from: "applications",
+                localField: "applications",
+                foreignField: "_id",
+                as: "result",
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "employees",
+                            localField: "employee",
+                            foreignField: "_id",
+                            as: "owner",
+                            pipeline: [
+                                {
+                                    $project: {
+                                        fName: 1,
+                                        lName: 1,
+                                        avatar: 1,
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ]);
+
+    if (newJobApplication.length === 0) {
         throw new ApiError(400, "Job Applicatino not found");
     }
 
     return res
         .status(200)
-        .josn(
+        .json(
             new ApiResponce(
                 200,
-                newJobApplication,
+                newJobApplication[0],
                 "Job Application found Successfully",
             ),
         );
