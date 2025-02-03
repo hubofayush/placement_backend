@@ -140,10 +140,12 @@ const Register = asyncHandler(async (req, res) => {
     const {
         fName,
         lName,
+        // fetch
         age,
         gender,
         phone,
         password,
+        // fetch 
         dateOfBirth,
         experience,
         position,

@@ -3,6 +3,8 @@ import { JobApplication } from "../../models/Employer.models/jobApplication.mode
 import { ApiError } from "../../utils/ApiError.js";
 import { ApiResponce } from "../../utils/ApiResponce.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
+import { Application } from "../../models/Employee.models/application.model.js";
+import { Employee } from "../../models/Employee.models/employee.model.js";
 
 // generate job application controller //
 const postApplication = asyncHandler(async (req, res) => {
@@ -223,7 +225,50 @@ const changeJobStatus = asyncHandler(async (req, res) => {
 });
 // toggle job status //
 
+// view one application //
+// FIXME: make employee visible on the application
+const viewSingleApplication = asyncHandler(async (req, res) => {
+    const applicationID = req.params.id;
 
+    if (!applicationID) {
+        throw new ApiError(400, "Application ID required");
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(applicationID)) {
+        throw new ApiError(400, '"Invalid Application ID');
+    }
+
+    const newApplication = await Application.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(applicationID),
+            },
+        },
+        {
+            $lookup: {
+                from: "employees",
+                localField: "employee",
+                foreignField: "_id",
+                as: "owner",
+            },
+        },
+    ]);
+
+    if (newApplication.length === 0) {
+        throw new ApiError(400, "Application Not Found");
+    }
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponce(
+                200,
+                newApplication,
+                "application found successfully",
+            ),
+        );
+});
+// end of view one application //
 
 // view job request applications //
 const viewJobApplicationsRequests = asyncHandler(async (req, res) => {
@@ -286,4 +331,5 @@ export {
     changeJobStatus,
     updateJobApplication,
     viewJobApplicationsRequests,
+    viewSingleApplication,
 };

@@ -2,7 +2,7 @@ import { asyncHandler } from "../../utils/asyncHandler.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { ApiResponce } from "../../utils/ApiResponce.js";
 import { JobApplication } from "../../models/Employer.models/jobApplication.model.js";
-import mongoose, { Mongoose } from "mongoose";
+import mongoose, { mongo, Mongoose } from "mongoose";
 import { Application } from "../../models/Employee.models/application.model.js";
 import { uploadOnCloudinaryPDF } from "../../utils/cloudinary.js";
 
@@ -64,9 +64,10 @@ const postApplication = asyncHandler(async (req, res) => {
     if (!resume) {
         throw new ApiError(400, "Resume upload failed on cloudinary");
     }
+
     // console.log(req.employee);
     const newApplication = await Application.create({
-        employee: new mongoose.Types.ObjectId(req.employee?._id),
+        employee: new mongoose.Types.ObjectId(req.employee._id),
         bid: bid,
         resume: resume.secure_url,
         jobApplication: jobId,
@@ -90,4 +91,35 @@ const postApplication = asyncHandler(async (req, res) => {
         );
 });
 // end of post application for job //
-export { getAllApplications, postApplication };
+
+// view job application //
+const viewJobApplication = asyncHandler(async (req, res) => {
+    const { jobId } = req.params;
+
+    if (!jobId) {
+        throw new ApiError(400, "Job Application Id Required");
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(jobId)) {
+        throw new ApiError(400, "Invalid Id");
+    }
+
+    const newJobApplication =
+        await JobApplication.findById(jobId).select("-active -owner ");
+
+    if (!newJobApplication) {
+        throw new ApiError(400, "Job Applicatino not found");
+    }
+
+    return res
+        .status(200)
+        .josn(
+            new ApiResponce(
+                200,
+                newJobApplication,
+                "Job Application found Successfully",
+            ),
+        );
+});
+// end of view job application //
+export { getAllApplications, postApplication, viewJobApplication };

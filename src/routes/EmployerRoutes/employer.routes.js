@@ -12,6 +12,7 @@ import {
     postApplication,
     updateJobApplication,
     viewJobApplicationsRequests,
+    viewSingleApplication,
 } from "../../controllers/job/employerApplication.controller.js";
 import { verifyJWTEmployer } from "../../middlewares/auth.middleware.js";
 import { upload } from "../../middlewares/multer.middleware.js";
@@ -39,6 +40,9 @@ router.route("/job/toggle/:id").patch(verifyJWTEmployer, changeJobStatus);
 router
     .route("/job/application/:id")
     .get(verifyJWTEmployer, viewJobApplicationsRequests);
+router
+    .route("/job/application/view/:id")
+    .get(verifyJWTEmployer, viewSingleApplication);
 // job application routes //
 
 // end of validation routes //
