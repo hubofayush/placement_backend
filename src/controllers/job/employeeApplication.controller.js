@@ -5,6 +5,7 @@ import { JobApplication } from "../../models/Employer.models/jobApplication.mode
 import mongoose, { mongo, Mongoose } from "mongoose";
 import { Application } from "../../models/Employee.models/application.model.js";
 import { uploadOnCloudinaryPDF } from "../../utils/cloudinary.js";
+import { AppPage } from "twilio/lib/rest/microvisor/v1/app.js";
 
 // get all aplications //
 const getAllApplications = asyncHandler(async (req, res) => {
@@ -158,4 +159,27 @@ const viewJobApplication = asyncHandler(async (req, res) => {
         );
 });
 // end of view job application //
-export { getAllApplications, postApplication, viewJobApplication };
+
+// view posted applications //
+const viewMyApplications = asyncHandler(async (req, res) => {
+    const jobApplications = await Application.find({
+        employee: req.employee?._id,
+    });
+
+    if (!jobApplications) {
+        return res
+            .status(200)
+            .json(new ApiResponce(200, [], "No Application Found"));
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponce(200, jobApplications, "Applications Found"));
+});
+// end of view posted applications //
+export {
+    getAllApplications,
+    postApplication,
+    viewJobApplication,
+    viewMyApplications,
+};

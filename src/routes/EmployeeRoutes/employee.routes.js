@@ -17,6 +17,7 @@ import {
     getAllApplications,
     postApplication,
     viewJobApplication,
+    viewMyApplications,
 } from "../../controllers/job/employeeApplication.controller.js";
 
 /**
@@ -40,6 +41,8 @@ router.route("/search").get(verifyJWT, search);
 router.route("/search/company/:companyId").get(verifyJWT, viewCompany);
 
 // job application routes //
+router.route("/job/myapplicatons").get(verifyJWT, viewMyApplications);
+
 router
     .route("/job/:jobId")
     .post(verifyJWT, upload.single("resume"), postApplication)
