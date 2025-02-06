@@ -9,6 +9,7 @@ import { Experience } from "../../models/Employee.models/experience.model.js";
 import { EmployeeSubscription } from "../../models/Employee.models/employeesSbscription.model.js";
 import { Employer } from "../../models/Employer.models/employer.model.js";
 import { JobApplication } from "../../models/Employer.models/jobApplication.model.js";
+import { EmployeeNotification } from "../../models/Employee.models/employeeNotification.model.js";
 // import jwt from "jsonwebtoken";
 
 /**
@@ -145,7 +146,7 @@ const Register = asyncHandler(async (req, res) => {
         gender,
         phone,
         password,
-        // fetch 
+        // fetch
         dateOfBirth,
         experience,
         position,
@@ -779,6 +780,22 @@ const viewCompany = asyncHandler(async (req, res) => {
 /**
  * ____________ END OF View Company Profile_________
  */
+
+// view all notificatin //
+const viewNotifications = asyncHandler(async (req, res) => {
+    const notifications = await EmployeeNotification.find({
+        employee: req.employee._id,
+    });
+    if (!notifications) {
+        throw new ApiError(400, "no Notificatins");
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponce(200, notifications, "Notifiactions"));
+});
+// end of view all notificatin //
+
 /**
  * _________ Exporting functions ___________S
  */
@@ -791,6 +808,7 @@ export {
     updatePassword,
     search,
     viewCompany,
+    viewNotifications,
 };
 /**
  * ____ END OF exprting function_________

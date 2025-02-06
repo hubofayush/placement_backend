@@ -10,6 +10,7 @@ import {
     updateEmployee,
     updatePassword,
     viewCompany,
+    viewNotifications,
 } from "../../controllers/Employee/employee.controller.js";
 const router = Router();
 import { verifyJWT } from "../../middlewares/auth.middleware.js";
@@ -39,6 +40,7 @@ router.route("/updateUser").patch(verifyJWT, updateEmployee);
 router.route("/updatePassword").patch(verifyJWT, updatePassword);
 router.route("/search").get(verifyJWT, search);
 router.route("/search/company/:companyId").get(verifyJWT, viewCompany);
+router.route("/notifications").get(verifyJWT, viewNotifications);
 
 // job application routes //
 router.route("/job/myapplicatons").get(verifyJWT, viewMyApplications);

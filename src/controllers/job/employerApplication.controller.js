@@ -7,6 +7,7 @@ import { Application } from "../../models/Employee.models/application.model.js";
 import { Employee } from "../../models/Employee.models/employee.model.js";
 import { AvailablePhoneNumberCountryInstance } from "twilio/lib/rest/api/v2010/account/availablePhoneNumberCountry.js";
 import { ShortlistedApplication } from "../../models/Employer.models/shortlistedApplication.model.js";
+import { EmployeeNotification } from "../../models/Employee.models/employeeNotification.model.js";
 
 // generate job application controller //
 const postApplication = asyncHandler(async (req, res) => {
@@ -396,6 +397,31 @@ const shortListApplication = asyncHandler(async (req, res) => {
         if (!shortList) {
             throw new ApiError(404, " shortlisting application error");
         }
+
+        // notifiaction //
+        const empInfo = await Application.findById(appID);
+        if (!empInfo) {
+            throw new ApiError(400, "Application Not Found, Try again");
+        }
+
+        const jobInfo = await JobApplication.findById(jobID);
+        if (!jobInfo) {
+            throw new ApiError(400, "Job Applicaitn Not Found, Try again");
+        }
+
+        console.log(empInfo);
+        const newNotification = await EmployeeNotification.create({
+            employee: new mongoose.Types.ObjectId(empInfo.employee),
+            employer: new mongoose.Types.ObjectId(req.employer._id),
+            title: "Application Shortlisted",
+            message: `Your Application Shortlisted for ${jobInfo.title} by ${req.employer?.name} 
+            ${shortList.createdAt}`,
+            read: false,
+        });
+        if (!newNotification) {
+            throw new ApiError(400, "notifiaction not send to employee");
+        }
+        // end of notifiaction //
 
         return res
             .status(200)

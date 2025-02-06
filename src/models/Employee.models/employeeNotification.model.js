@@ -6,7 +6,7 @@ const employeeNotificationSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "Employee",
         },
-        emploer: {
+        employer: {
             type: Schema.Types.ObjectId,
             ref: "Employer",
         },

@@ -180,6 +180,7 @@ export const verifyJWTEmployer = asyncHandler(async (req, res, next) => {
         }
 
         req.employer = employer;
+        console.log(req.employer);
         next();
     } catch (error) {
         throw new ApiError(401, error?.message || "invalid accessToken");
