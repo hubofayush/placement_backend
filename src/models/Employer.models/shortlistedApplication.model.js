@@ -2,9 +2,9 @@ import mongoose, { Schema } from "mongoose";
 
 const shortlistedApplicationSchema = new Schema(
     {
-        employee: {
+        application: {
             type: Schema.Types.ObjectId,
-            ref: "Employee",
+            ref: "Application",
         },
         jobApplication: {
             type: Schema.Types.ObjectId,
