@@ -6,6 +6,7 @@ import { asyncHandler } from "../../utils/asyncHandler.js";
 import { Application } from "../../models/Employee.models/application.model.js";
 import { Employee } from "../../models/Employee.models/employee.model.js";
 import { AvailablePhoneNumberCountryInstance } from "twilio/lib/rest/api/v2010/account/availablePhoneNumberCountry.js";
+import { ShortlistedApplication } from "../../models/Employer.models/shortlistedApplication.model.js";
 
 // generate job application controller //
 const postApplication = asyncHandler(async (req, res) => {
@@ -227,7 +228,6 @@ const changeJobStatus = asyncHandler(async (req, res) => {
 // toggle job status //
 
 // view one application //
-// FIXME: make employee visible on the application
 const viewSingleApplication = asyncHandler(async (req, res) => {
     const applicationID = req.params.id;
 
@@ -369,6 +369,63 @@ const viewJobApplicationsRequests = asyncHandler(async (req, res) => {
 });
 // end of view job request applications //
 
+// select Job Applicaion //
+const shortListApplication = asyncHandler(async (req, res) => {
+    const { appID, jobID } = req.query;
+    if (!appID || !jobID) {
+        throw new ApiError(400, "Application ID and Job ID required");
+    }
+
+    if (
+        !mongoose.Types.ObjectId.isValid(appID) ||
+        !mongoose.Types.ObjectId.isValid(jobID)
+    ) {
+        throw new ApiError(400, "Invalid Id");
+    }
+
+    let data = {
+        employee: appID,
+        jobApplication: jobID,
+    };
+
+    const newshortlistedApplication =
+        await ShortlistedApplication.findOne(data);
+
+    if (!newshortlistedApplication) {
+        const shortList = await ShortlistedApplication.create(data);
+        if (!shortList) {
+            throw new ApiError(404, " shortlisting application error");
+        }
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponce(
+                    200,
+                    shortList,
+                    "Application shortlisted successfully",
+                ),
+            );
+    } else {
+        const unShortList = await ShortlistedApplication.findOneAndDelete(data);
+
+        if (!unShortList) {
+            throw new ApiError(404, "unshortlisting application error");
+        }
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponce(
+                    200,
+                    unShortList,
+                    "Application unshortlisted successfully",
+                ),
+            );
+    }
+});
+// end of select Job Applicaion //
+
 export {
     postApplication,
     getMyApplications,
@@ -377,4 +434,5 @@ export {
     updateJobApplication,
     viewJobApplicationsRequests,
     viewSingleApplication,
+    shortListApplication,
 };

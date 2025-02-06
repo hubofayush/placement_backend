@@ -10,12 +10,14 @@ import {
     deleteJobApplication,
     getMyApplications,
     postApplication,
+    shortListApplication,
     updateJobApplication,
     viewJobApplicationsRequests,
     viewSingleApplication,
 } from "../../controllers/job/employerApplication.controller.js";
 import { verifyJWTEmployer } from "../../middlewares/auth.middleware.js";
 import { upload } from "../../middlewares/multer.middleware.js";
+import { ShortlistedApplication } from "../../models/Employer.models/shortlistedApplication.model.js";
 
 const router = express.Router();
 
@@ -28,7 +30,9 @@ router.route("/login").post(loginEmployer);
 router.route("/logout").get(verifyJWTEmployer, logOutEmployer);
 router.route("/viewEmployee/:empId").get(verifyJWTEmployer, viewProfile);
 
-// job application routes //
+/**
+ * job application routes
+ */
 router.route("/job").post(verifyJWTEmployer, postApplication);
 router.route("/job").get(verifyJWTEmployer, getMyApplications);
 router
@@ -43,6 +47,13 @@ router
 router
     .route("/job/application/view/:id")
     .get(verifyJWTEmployer, viewSingleApplication);
+
+// shortlist application //
+router
+    .route("/job/application/shortlist")
+    .post(verifyJWTEmployer, shortListApplication);
+// end of shortlist application //
+
 // job application routes //
 
 // end of validation routes //
