@@ -5,6 +5,7 @@ import {
     getCurrentUser,
     loginEmployee,
     logoutEmployee,
+    readNotifiaction,
     Register,
     search,
     updateEmployee,
@@ -41,6 +42,7 @@ router.route("/updatePassword").patch(verifyJWT, updatePassword);
 router.route("/search").get(verifyJWT, search);
 router.route("/search/company/:companyId").get(verifyJWT, viewCompany);
 router.route("/notifications").get(verifyJWT, viewNotifications);
+router.route("/notification/:id").patch(verifyJWT, readNotifiaction);
 
 // job application routes //
 router.route("/job/myapplicatons").get(verifyJWT, viewMyApplications);

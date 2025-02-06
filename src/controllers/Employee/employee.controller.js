@@ -10,6 +10,7 @@ import { EmployeeSubscription } from "../../models/Employee.models/employeesSbsc
 import { Employer } from "../../models/Employer.models/employer.model.js";
 import { JobApplication } from "../../models/Employer.models/jobApplication.model.js";
 import { EmployeeNotification } from "../../models/Employee.models/employeeNotification.model.js";
+import Api from "twilio/lib/rest/Api.js";
 // import jwt from "jsonwebtoken";
 
 /**
@@ -785,6 +786,7 @@ const viewCompany = asyncHandler(async (req, res) => {
 const viewNotifications = asyncHandler(async (req, res) => {
     const notifications = await EmployeeNotification.find({
         employee: req.employee._id,
+        read: false,
     });
     if (!notifications) {
         throw new ApiError(400, "no Notificatins");
@@ -796,6 +798,38 @@ const viewNotifications = asyncHandler(async (req, res) => {
 });
 // end of view all notificatin //
 
+// view single Notification //
+const readNotifiaction = asyncHandler(async (req, res) => {
+    const notificationId = req.params.id;
+
+    if (!notificationId) {
+        throw new ApiError(400, "Notification ID Required");
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(notificationId)) {
+        throw new ApiError(400, "Invalid notifiaction ID");
+    }
+
+    const notification = await EmployeeNotification.findByIdAndUpdate(
+        notificationId,
+        {
+            $set: {
+                read: true,
+            },
+        },
+        {
+            $new: true,
+        },
+    );
+    if (!notification) {
+        throw new ApiError(400, "Not Readed Notification");
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponce(200, notification, "Notification Red"));
+});
+// end of view single Notification //
 /**
  * _________ Exporting functions ___________S
  */
@@ -809,6 +843,7 @@ export {
     search,
     viewCompany,
     viewNotifications,
+    readNotifiaction,
 };
 /**
  * ____ END OF exprting function_________
