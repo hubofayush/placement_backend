@@ -13,6 +13,7 @@ import {
     shortListApplication,
     updateJobApplication,
     viewJobApplicationsRequests,
+    viewShortlistedApplications,
     viewSingleApplication,
 } from "../../controllers/job/employerApplication.controller.js";
 import { verifyJWTEmployer } from "../../middlewares/auth.middleware.js";
@@ -52,6 +53,9 @@ router
 router
     .route("/job/application/shortlist")
     .post(verifyJWTEmployer, shortListApplication);
+router
+    .route("/job/application/shortlist/:id")
+    .get(verifyJWTEmployer, viewShortlistedApplications);
 // end of shortlist application //
 
 // job application routes //

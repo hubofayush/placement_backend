@@ -384,8 +384,8 @@ const shortListApplication = asyncHandler(async (req, res) => {
     }
 
     let data = {
-        employee: appID,
         jobApplication: jobID,
+        application: appID,
     };
 
     const newshortlistedApplication =
@@ -426,6 +426,72 @@ const shortListApplication = asyncHandler(async (req, res) => {
 });
 // end of select Job Applicaion //
 
+// view shortlisted applications //
+const viewShortlistedApplications = asyncHandler(async (req, res) => {
+    const jobID = req.params.id;
+
+    if (!jobID) {
+        throw new ApiError(400, "Job ID required");
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(jobID)) {
+        throw new ApiError(400, "Invalid Id");
+    }
+
+    // const shortlistedApplications = await ShortlistedApplication.find({
+    //     jobApplication: jobID,
+    // });
+
+    const shortlistedApplications = await ShortlistedApplication.aggregate([
+        {
+            $match: {
+                jobApplication: new mongoose.Types.ObjectId(jobID),
+            },
+        },
+        {
+            $lookup: {
+                from: "applications",
+                foreignField: "_id",
+                localField: "application",
+                as: "application",
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "employees",
+                            foreignField: "_id",
+                            localField: "employee",
+                            as: "employee",
+                            pipeline: [
+                                {
+                                    $project: {
+                                        fName: 1,
+                                        lName: 1,
+                                        avatar: 1,
+                                        phone: 1,
+                                        email: 1,
+                                        education: 1,
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                ],
+            },
+        },
+    ]);
+
+    if (!shortlistedApplications) {
+        throw new ApiError(400, "No shortlisted applications found");
+    }
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponce(200, shortlistedApplications, "Applications Found"),
+        );
+});
+// end of shortlisted applicaitons //
+
 export {
     postApplication,
     getMyApplications,
@@ -435,4 +501,5 @@ export {
     viewJobApplicationsRequests,
     viewSingleApplication,
     shortListApplication,
+    viewShortlistedApplications,
 };
