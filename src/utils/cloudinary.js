@@ -42,7 +42,7 @@ const uploadOnCloudinaryPDF = async (localFilePath) => {
         if (!localFilePath) return null;
         // ** upload file on cloudinary
         const responce = await cloudinary.uploader.upload(localFilePath, {
-            resource_type: "auto",
+            resource_type: "raw",
             format: "pdf",
         });
         //file has been uploaded successfully

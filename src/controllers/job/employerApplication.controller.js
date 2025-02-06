@@ -5,6 +5,7 @@ import { ApiResponce } from "../../utils/ApiResponce.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { Application } from "../../models/Employee.models/application.model.js";
 import { Employee } from "../../models/Employee.models/employee.model.js";
+import { AvailablePhoneNumberCountryInstance } from "twilio/lib/rest/api/v2010/account/availablePhoneNumberCountry.js";
 
 // generate job application controller //
 const postApplication = asyncHandler(async (req, res) => {
@@ -250,6 +251,50 @@ const viewSingleApplication = asyncHandler(async (req, res) => {
                 localField: "employee",
                 foreignField: "_id",
                 as: "owner",
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "experiences",
+                            localField: "workExperience",
+                            foreignField: "_id",
+                            as: "workExperience",
+                        },
+                    },
+                    {
+                        $lookup: {
+                            from: "employeesubscriptions",
+                            localField: "subscription",
+                            foreignField: "_id",
+                            as: "subscription",
+                        },
+                    },
+                    {
+                        $lookup: {
+                            from: "locations",
+                            localField: "location",
+                            foreignField: "_id",
+                            as: "location",
+                        },
+                    },
+                    {
+                        $project: {
+                            avatar: 1,
+                            fName: 1,
+                            lName: 1,
+                            phone: 1,
+                            email: 1,
+                            workExperience: 1,
+                            subscription: 1,
+                            location: 1,
+                            age: 1,
+                        },
+                    },
+                    {
+                        $sort: {
+                            createdAt: -1,
+                        },
+                    },
+                ],
             },
         },
     ]);
@@ -258,6 +303,7 @@ const viewSingleApplication = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Application Not Found");
     }
 
+    // return res.redirect(newApplication[0].resume);
     return res
         .status(200)
         .json(
@@ -321,7 +367,6 @@ const viewJobApplicationsRequests = asyncHandler(async (req, res) => {
             ),
         );
 });
-
 // end of view job request applications //
 
 export {
