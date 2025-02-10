@@ -825,9 +825,42 @@ const readNotifiaction = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Not Readed Notification");
     }
 
+    // FIXME: get a job application details and employer details
+    const notificationData = await EmployeeNotification.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(notificationId),
+            },
+        },
+        {
+            $lookup: {
+                from: "applications",
+                localField: "applicationId",
+                foreignField: "_id",
+                as: "application",
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "jobapplications",
+                            foreignField: "_id",
+                            localField: "jobApplication",
+                            as: "jobApplication",
+                        },
+                    },
+                ],
+            },
+        },
+    ]);
+
     return res
         .status(200)
-        .json(new ApiResponce(200, notification, "Notification Red"));
+        .json(
+            new ApiResponce(
+                200,
+                { notification, notificationData: notificationData[0] },
+                "Notification Red",
+            ),
+        );
 });
 // end of view single Notification //
 /**
