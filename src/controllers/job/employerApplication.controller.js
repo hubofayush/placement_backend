@@ -417,7 +417,9 @@ const shortListApplication = asyncHandler(async (req, res) => {
             message: `Your Application Shortlisted for ${jobInfo.title} by ${req.employer?.name} 
             ${shortList.createdAt}`,
             read: false,
+            applicationId: new mongoose.Types.ObjectId(appID),
         });
+
         if (!newNotification) {
             throw new ApiError(400, "notifiaction not send to employee");
         }

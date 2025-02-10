@@ -10,7 +10,10 @@ const employeeNotificationSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "Employer",
         },
-
+        applicationId: {
+            type: Schema.Types.ObjectId,
+            ref: "Application",
+        },
         title: {
             type: String,
             required: true,
