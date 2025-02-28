@@ -26,7 +26,7 @@ import {
  * INSECURED ROUTES
  */
 router.route("/register").post(upload.single("avatar"), Register);
-router.route("/login").get(loginEmployee);
+router.route("/login").post(loginEmployee);
 router.route("/").get(getAllApplications);
 /**
  *  END OF INSECURED ROUTES

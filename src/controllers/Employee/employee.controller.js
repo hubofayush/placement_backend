@@ -410,7 +410,7 @@ const loginEmployee = asyncHandler(async (req, res) => {
         secure: true,
     };
     // end of setting options for cookies //
-
+    console.log("employee");
     // sending responce  //
     return res
         .status(200)
@@ -825,7 +825,6 @@ const readNotifiaction = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Not Readed Notification");
     }
 
-    // FIXME: get a job application details and employer details
     const notificationData = await EmployeeNotification.aggregate([
         {
             $match: {
