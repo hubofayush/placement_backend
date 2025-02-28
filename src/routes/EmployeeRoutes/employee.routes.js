@@ -18,6 +18,7 @@ import { verifyJWT } from "../../middlewares/auth.middleware.js";
 import {
     getAllApplications,
     postApplication,
+    updateApplicationBid,
     viewJobApplication,
     viewMyApplications,
     viewSingleApplication,
@@ -50,6 +51,10 @@ router.route("/job/myapplicatons").get(verifyJWT, viewMyApplications);
 router
     .route("/job/viewApplication/:applicationId")
     .get(verifyJWT, viewSingleApplication);
+
+router
+    .route("/job/application/update/:applicationId")
+    .patch(verifyJWT, updateApplicationBid);
 
 router
     .route("/job/:jobId")

@@ -6,6 +6,7 @@ import mongoose, { mongo, Mongoose } from "mongoose";
 import { Application } from "../../models/Employee.models/application.model.js";
 import { uploadOnCloudinaryPDF } from "../../utils/cloudinary.js";
 import fs from "fs";
+
 // get all aplications //
 const getAllApplications = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, sortBy, sortType } = req.query;
@@ -273,10 +274,50 @@ const viewSingleApplication = asyncHandler(async (req, res) => {
     );
 });
 // end of view single application //
+
+// update application //
+const updateApplicationBid = asyncHandler(async (req, res) => {
+    const { applicationId } = req.params;
+    const { bid } = req.body;
+
+    if (!applicationId) {
+        throw new ApiError(400, "Application id required");
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(applicationId)) {
+        throw new ApiError(400, "invalid id");
+    }
+
+    const foundApplication = await Application.findById(applicationId);
+
+    if (!foundApplication) {
+        throw new ApiError(401, "application not found");
+    }
+
+    if (!foundApplication.employee.equals(req.employee?._id)) {
+        throw new ApiError(400, "Owner not matched");
+    }
+    if (!bid) {
+        throw new ApiError(400, "bid required");
+    }
+
+    foundApplication.bid = bid || foundApplication.bid;
+    await foundApplication.save({ validateBeforeSave: false });
+
+    if (!foundApplication) {
+        throw new ApiError(400, "cant update appliation");
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponce(200, foundApplication, "updated successfully"));
+});
+// end of update application //
 export {
     getAllApplications,
     postApplication,
     viewJobApplication,
     viewMyApplications,
     viewSingleApplication,
+    updateApplicationBid,
 };
