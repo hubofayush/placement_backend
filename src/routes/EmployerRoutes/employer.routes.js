@@ -18,7 +18,6 @@ import {
 } from "../../controllers/job/employerApplication.controller.js";
 import { verifyJWTEmployer } from "../../middlewares/auth.middleware.js";
 import { upload } from "../../middlewares/multer.middleware.js";
-import { ShortlistedApplication } from "../../models/Employer.models/shortlistedApplication.model.js";
 
 const router = express.Router();
 

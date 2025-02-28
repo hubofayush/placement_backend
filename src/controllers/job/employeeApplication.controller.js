@@ -5,8 +5,7 @@ import { JobApplication } from "../../models/Employer.models/jobApplication.mode
 import mongoose, { mongo, Mongoose } from "mongoose";
 import { Application } from "../../models/Employee.models/application.model.js";
 import { uploadOnCloudinaryPDF } from "../../utils/cloudinary.js";
-import { AppPage } from "twilio/lib/rest/microvisor/v1/app.js";
-
+import fs from "fs";
 // get all aplications //
 const getAllApplications = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, sortBy, sortType } = req.query;
@@ -32,10 +31,8 @@ const getAllApplications = asyncHandler(async (req, res) => {
 // end of get all aplications //
 
 // post application for job //
-// TODO: cant post more than one application to a job application
 const postApplication = asyncHandler(async (req, res) => {
     const { jobId } = req.params;
-
     const { bid } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(jobId)) {
@@ -45,6 +42,22 @@ const postApplication = asyncHandler(async (req, res) => {
     if (!jobId) {
         throw new ApiError(400, "job id needed");
     }
+    const resumeLocal = req.file?.path;
+    const resumeLocalPath = resumeLocal;
+    if (!resumeLocalPath) {
+        throw new ApiError(400, "Resume file is required");
+    }
+    // checking if employer applicarion is already present //
+    const oldApplication = await Application.find({
+        employee: new mongoose.Types.ObjectId(req.employee._id),
+        jobApplication: jobId,
+    });
+
+    if (oldApplication) {
+        fs.unlinkSync(resumeLocalPath);
+        throw new ApiError(400, "Cant Upload multiple Application");
+    }
+    // end of checking if employer applicarion is already present //
 
     if (!bid) {
         throw new ApiError(400, "bid is required");
@@ -54,12 +67,6 @@ const postApplication = asyncHandler(async (req, res) => {
 
     if (!job) {
         throw new ApiError(404, "No job found");
-    }
-
-    const resumeLocal = req.file?.path;
-    const resumeLocalPath = resumeLocal;
-    if (!resumeLocalPath) {
-        throw new ApiError(400, "Resume file is required");
     }
     const resume = await uploadOnCloudinaryPDF(resumeLocalPath);
     if (!resume) {
@@ -162,11 +169,37 @@ const viewJobApplication = asyncHandler(async (req, res) => {
 
 // view posted applications //
 const viewMyApplications = asyncHandler(async (req, res) => {
-    const jobApplications = await Application.find({
-        employee: req.employee?._id,
-    });
+    // const jobApplications = await Application.find({
+    //     employee: req.employee?._id,
+    // });
 
-    if (!jobApplications) {
+    // updating controller //
+    const jobApplications = await Application.aggregate([
+        {
+            $match: {
+                employee: req.employee?._id,
+            },
+        },
+        {
+            $lookup: {
+                from: "jobapplications",
+                localField: "jobApplication",
+                foreignField: "_id",
+                as: "jobApplicatIonInfo",
+                pipeline: [
+                    {
+                        $project: {
+                            companyName: 1,
+                            title: 1,
+                        },
+                    },
+                ],
+            },
+        },
+    ]);
+    // end of updating controller //
+
+    if (jobApplications.length === null) {
         return res
             .status(200)
             .json(new ApiResponce(200, [], "No Application Found"));
