@@ -20,6 +20,7 @@ import {
     postApplication,
     viewJobApplication,
     viewMyApplications,
+    viewSingleApplication,
 } from "../../controllers/job/employeeApplication.controller.js";
 
 /**
@@ -46,6 +47,9 @@ router.route("/notification/:id").patch(verifyJWT, readNotifiaction);
 
 // job application routes //
 router.route("/job/myapplicatons").get(verifyJWT, viewMyApplications);
+router
+    .route("/job/viewApplication/:applicationId")
+    .get(verifyJWT, viewSingleApplication);
 
 router
     .route("/job/:jobId")

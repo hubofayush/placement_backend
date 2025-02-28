@@ -210,9 +210,73 @@ const viewMyApplications = asyncHandler(async (req, res) => {
         .json(new ApiResponce(200, jobApplications, "Applications Found"));
 });
 // end of view posted applications //
+
+// view single application //
+const viewSingleApplication = asyncHandler(async (req, res) => {
+    const { applicationId } = req.params;
+    if (!applicationId) {
+        throw new ApiError(400, "Applicarion ID required");
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(applicationId)) {
+        throw new ApiError(400, "Invalid Id");
+    }
+
+    const applicationInfo = await Application.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(applicationId),
+            },
+        },
+        {
+            $lookup: {
+                from: "jobapplications",
+                localField: "jobApplication",
+                foreignField: "_id",
+                as: "jobApplicationInfo",
+                pipeline: [
+                    {
+                        $project: {
+                            companyName: 1,
+                            owner: 1,
+                            title: 1,
+                            description: 1,
+                            openings: 1,
+                            location: 1,
+                            jobType: 1,
+                            qualification: 1,
+                            jobHours: 1,
+                            instructions: 1,
+                            contactInfo: 1,
+                            closeDate: 1,
+                            appliacations: 1,
+                        },
+                    },
+                ],
+            },
+        },
+    ]);
+
+    if (applicationInfo.length === 0) {
+        throw new ApiError(401, "Application Not Found or Try again");
+    }
+
+    return res.status(200).json(
+        new ApiResponce(
+            200,
+            {
+                applicationInfo: applicationInfo[0],
+                jobApplicationInfo: applicationInfo[0].jobApplicationInfo[0],
+            },
+            "Applicatin Found Successfull",
+        ),
+    );
+});
+// end of view single application //
 export {
     getAllApplications,
     postApplication,
     viewJobApplication,
     viewMyApplications,
+    viewSingleApplication,
 };
