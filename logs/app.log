@@ -1,1 +1,7 @@
 [2025-03-11T08:23:27.161Z] INFO: Request from IP: ::1 - POST /api/v1/emp/login
+[2025-03-11T08:25:17.433Z] INFO: Request from IP: ::1 - POST /api/v1/emr/login
+[2025-03-11T08:26:29.237Z] INFO: Request from IP: ::1 - POST /api/v1/emr/login
+[2025-03-11T08:33:31.121Z] INFO: [SUCCESS] POST /login | IP: ::1 | Status: 200 | Duration: 171ms
+[2025-03-11T08:33:43.412Z] ERROR: [FAILED] POST /api/v1/emr/login | IP: ::1 | Status: 400 | Duration: 140ms
+[2025-03-11T08:34:18.403Z] INFO: [SUCCESS] POST /login | IP: ::1 | Status: 200 | Duration: 16002ms
+[2025-03-11T08:34:28.311Z] INFO: [SUCCESS] GET /viewEmployee/6778214cbe7cebc9d50b70e3 | IP: ::1 | Status: 200 | Duration: 63ms
