@@ -14,6 +14,9 @@ app.use(
     }),
 );
 app.use(cookieParser());
+// for loging//
+app.use(logClientIP);
+// for loging//
 
 // importing routes //
 
@@ -27,6 +30,7 @@ import employeeRouter from "./routes/EmployeeRoutes/employee.routes.js";
 
 // **_______EMPLOYER ROUTES_____________*/
 import employerRouter from "./routes/EmployerRoutes/employer.routes.js";
+import logClientIP from "./middlewares/LogIp.middleware.js";
 // **_______EMD OF EMPLOYER ROUTES_____________*/
 // end of importing routes
 
