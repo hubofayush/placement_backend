@@ -10,6 +10,7 @@ import { EmployeeSubscription } from "../../models/Employee.models/employeesSbsc
 import { Employer } from "../../models/Employer.models/employer.model.js";
 import { JobApplication } from "../../models/Employer.models/jobApplication.model.js";
 import { EmployeeNotification } from "../../models/Employee.models/employeeNotification.model.js";
+import logger from "../../utils/logger.js";
 import Api from "twilio/lib/rest/Api.js";
 // import jwt from "jsonwebtoken";
 
@@ -160,7 +161,7 @@ const Register = asyncHandler(async (req, res) => {
     } = req.body;
 
     console.log(fName, lName, password, employed, dateOfBirth);
-    if (!fName || !lName || !password || !employed || !dateOfBirth) {
+    if (!fName || !lName || !password || !employed || !dateOfBirth || !gender) {
         throw new ApiError(404, "Required feilds not filled");
     } else {
     }
@@ -411,6 +412,7 @@ const loginEmployee = asyncHandler(async (req, res) => {
     };
     // end of setting options for cookies //
     console.log("employee");
+    logger.info(`Login attempt from IP: ${req.ip} with phone: ${phone}`);
     // sending responce  //
     return res
         .status(200)

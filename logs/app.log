@@ -5,3 +5,6 @@
 [2025-03-11T08:33:43.412Z] ERROR: [FAILED] POST /api/v1/emr/login | IP: ::1 | Status: 400 | Duration: 140ms
 [2025-03-11T08:34:18.403Z] INFO: [SUCCESS] POST /login | IP: ::1 | Status: 200 | Duration: 16002ms
 [2025-03-11T08:34:28.311Z] INFO: [SUCCESS] GET /viewEmployee/6778214cbe7cebc9d50b70e3 | IP: ::1 | Status: 200 | Duration: 63ms
+[2025-03-11T08:41:42.785Z] INFO: Login attempt from IP: ::1 with phone: 9673263120
+[2025-03-11T08:41:42.790Z] INFO: [SUCCESS] POST /login | IP: ::1 | Status: 200 | Duration: 463ms
+[2025-03-12T09:30:01.256Z] INFO: [SUCCESS] POST /register | IP: ::1 | Status: 201 | Duration: 6713ms
