@@ -14,6 +14,7 @@ app.use(
     }),
 );
 app.use(cookieParser());
+app.use(ipBlockerMiddleware);
 // for loging//
 app.use(logClientIP);
 // for loging//
@@ -31,6 +32,7 @@ import employeeRouter from "./routes/EmployeeRoutes/employee.routes.js";
 // **_______EMPLOYER ROUTES_____________*/
 import employerRouter from "./routes/EmployerRoutes/employer.routes.js";
 import logClientIP from "./middlewares/LogIp.middleware.js";
+import { ipBlockerMiddleware } from "./middlewares/blockIP.middleware.js";
 // **_______EMD OF EMPLOYER ROUTES_____________*/
 // end of importing routes
 
