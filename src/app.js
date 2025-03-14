@@ -34,6 +34,10 @@ import employerRouter from "./routes/EmployerRoutes/employer.routes.js";
 import logClientIP from "./middlewares/LogIp.middleware.js";
 import { ipBlockerMiddleware } from "./middlewares/blockIP.middleware.js";
 // **_______EMD OF EMPLOYER ROUTES_____________*/
+
+//**_________ ADMIN ROUTES_____________ */
+import adminRoute from "./routes/AdminRoutes/admin.routes.js";
+//**_________ END OF ADMIN ROUTES_____________ */
 // end of importing routes
 
 // apis / routes
@@ -51,5 +55,9 @@ app.use("/api/v1/emp", employeeRouter);
 // employer Routes //
 app.use("/api/v1/emr", employerRouter);
 // end of employer Routes //
+
+// admin routes //
+app.use("/api/v1/admin", adminRoute);
+// end of admin routes //
 
 export { app };
