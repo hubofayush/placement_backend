@@ -23,6 +23,13 @@ import {
     toggleEmployerStatus,
     viewAdminSingleEmployer,
 } from "../../controllers/admin/admin.employer.controller.js";
+import {
+    changeApplicationStatus,
+    getActiveApplications,
+    getAllJobApplications,
+    getDeactiveApplications,
+    viewAdminSingleJobApplication,
+} from "../../controllers/admin/admin.jobapplication.controller.js";
 
 const router = new Router();
 
@@ -56,6 +63,19 @@ router
     .delete(verifyAdmin, deleteEmployer)
     .patch(verifyAdmin, toggleEmployerStatus);
 // end of employer routes //
+
+// job applications //
+router.route("/jobApplications").get(verifyAdmin, getAllJobApplications);
+router.route("/jobApplications/active").get(verifyAdmin, getActiveApplications);
+router
+    .route("/jobApplications/deactive")
+    .get(verifyAdmin, getDeactiveApplications);
+
+router
+    .route("/jobApplication/:jobApplicationID")
+    .get(verifyAdmin, viewAdminSingleJobApplication)
+    .patch(verifyAdmin, changeApplicationStatus);
+// end of job applications //
 // secured routes //
 
 export default router;
