@@ -16,6 +16,13 @@ import {
     getDashboardStats,
     getPerformanceTracking,
 } from "../../controllers/admin/admin.analytics.controller.js";
+import {
+    deleteEmployer,
+    getAllEmployers,
+    getBlockedEmployers,
+    toggleEmployerStatus,
+    viewAdminSingleEmployer,
+} from "../../controllers/admin/admin.employer.controller.js";
 
 const router = new Router();
 
@@ -36,9 +43,19 @@ router
 // end of employee routes //
 
 // dashboard analytics //
-router.route("analytics/dashboard").get(verifyAdmin, getDashboardStats);
+router.route("/analytics/dashboard").get(verifyAdmin, getDashboardStats);
 router.route("/analytics/performance").get(verifyAdmin, getPerformanceTracking);
 // end of dashboard analytics //
+
+// employer routes //
+router.route("/employers").get(verifyAdmin, getAllEmployers);
+router.route("/employers/blocked").get(verifyAdmin, getBlockedEmployers);
+router
+    .route("/employer/:employerId")
+    .get(verifyAdmin, viewAdminSingleEmployer)
+    .delete(verifyAdmin, deleteEmployer)
+    .patch(verifyAdmin, toggleEmployerStatus);
+// end of employer routes //
 // secured routes //
 
 export default router;

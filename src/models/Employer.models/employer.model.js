@@ -55,6 +55,13 @@ const EmployerSchema = new Schema(
         logo: {
             type: String,
         },
+        isBlocked: {
+            type: Boolean,
+            default: false,
+        },
+        blockReason: {
+            type: String,
+        },
     },
     { timestamps: true },
 );
