@@ -10,6 +10,7 @@ import {
     getAllEmployees,
     getBlockedEmployees,
     toggleEmployeeStatus,
+    viewAdminSingleEmployee,
 } from "../../controllers/admin/admin.employee.controller.js";
 
 const router = new Router();
@@ -25,6 +26,7 @@ router.route("/employees").get(verifyAdmin, getAllEmployees);
 router.route("/employees/blocked").get(verifyAdmin, getBlockedEmployees);
 router
     .route("/employees/:employeeId")
+    .get(verifyAdmin, viewAdminSingleEmployee)
     .delete(verifyAdmin, deleteEmployee)
     .patch(verifyAdmin, toggleEmployeeStatus);
 // end of employee routes //

@@ -62,6 +62,88 @@ const getBlockedEmployees = asyncHandler(async (req, res) => {
         );
 });
 
+// view single employee
+const viewAdminSingleEmployee = asyncHandler(async (req, res) => {
+    const { employeeId } = req.params;
+
+    if (!employeeId) {
+        throw new ApiError(400, "Employee ID required");
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(employeeId)) {
+        throw new ApiError(400, "Wrong ID");
+    }
+
+    const employee = await Employee.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(employeeId),
+            },
+        },
+        {
+            $lookup: {
+                from: "experiences",
+                localField: "_id",
+                foreignField: "employee",
+                as: "experience",
+            },
+        },
+        {
+            $lookup: {
+                from: "locations",
+                localField: "location",
+                foreignField: "_id",
+                as: "currentLocation",
+                pipeline: [
+                    {
+                        $project: {
+                            state: 1,
+                            district: 1,
+                            subDistrict: 1,
+                            pincode: 1,
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            $lookup: {
+                from: "employeesubscriptions",
+                localField: "subscription",
+                foreignField: "_id",
+                as: "subscription",
+            },
+        },
+        {
+            $project: {
+                fName: 1,
+                lName: 1,
+                phone: 1,
+                age: 1,
+                education: 1,
+                experience: 1,
+                gender: 1,
+                avatar: 1,
+                currentLocation: 1,
+                dateOfBirth: 1,
+                leades: 1,
+                refreshToken: 1,
+                isBlocked: 1,
+                blockReason: 1,
+                subscription: 1,
+            },
+        },
+    ]);
+
+    if (employee.length === 0) {
+        throw new ApiError(400, "Invalid ID, please try again");
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponce(200, employee, "Employee Found"));
+});
+
 // Delete an employee
 const deleteEmployee = asyncHandler(async (req, res) => {
     const { employeeId } = req.params;
@@ -151,4 +233,5 @@ export {
     // bulkUploadEmployees,
     restoreDeletedEmployee,
     getBlockedEmployees,
+    viewAdminSingleEmployee,
 };
