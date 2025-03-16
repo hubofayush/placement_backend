@@ -7,6 +7,7 @@ import { Location } from "../models/location.model.js";
 import { EmployeeSubscription } from "../models/Employee.models/employeesSbscription.model.js";
 import { Experience } from "../models/Employee.models/experience.model.js";
 import Api from "twilio/lib/rest/Api.js";
+import { Admin } from "../models/Admin/admin.model.js";
 export const verifyJWT = asyncHandler(async (req, res, next) => {
     try {
         // checking the accesstokens which is strored in device or in browser
@@ -187,3 +188,37 @@ export const verifyJWTEmployer = asyncHandler(async (req, res, next) => {
     }
 });
 // verify token for employer //
+
+export const verifyAdmin = asyncHandler(async (req, res, next) => {
+    try {
+        const token =
+            req.cookies?.adminAccessToken ||
+            req.header("Authorization")?.replace("Bearer ", "");
+
+        if (!token) {
+            throw new ApiError(
+                400,
+                "unauthorized access please login or register",
+            );
+        }
+
+        const decodedToken = await jwt.verify(
+            token,
+            process.env.ACCESS_TOKEN_SECRET,
+        );
+
+        const admin = await Admin.findById(decodedToken?._id).select(
+            "-password -refreshToken",
+        );
+
+        if (!admin) {
+            throw new ApiError(401, "invalid user please login or register");
+        }
+
+        req.admin = admin;
+        console.log(req.admin);
+        next();
+    } catch (error) {
+        throw new ApiError(401, error?.message || "invalid accessToken");
+    }
+});

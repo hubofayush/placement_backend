@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 const AdminSchema = new Schema(
     {
@@ -18,8 +19,6 @@ const AdminSchema = new Schema(
         },
         phone: {
             type: String,
-            // required: true,
-            unique: true,
         },
         password: {
             type: String,
@@ -77,16 +76,18 @@ const AdminSchema = new Schema(
                 },
             },
         ],
+        refreshToken: {
+            type: String,
+        },
     },
     { timestamps: true },
 );
 
 // hash password //
-AdminSchema.pre("save", async function nex(next) {
-    if (!this.isModified("password")) return;
-    next();
+AdminSchema.pre("save", async function (next) {
+    if (!this.isModified("password")) return next();
 
-    this.password = bcrypt.hash(this.password, 10);
+    this.password = await bcrypt.hash(this.password, 10);
     next();
 });
 
