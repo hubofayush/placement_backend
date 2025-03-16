@@ -34,6 +34,34 @@ const getAllEmployees = asyncHandler(async (req, res) => {
         );
 });
 
+// get blocked employees
+const getBlockedEmployees = asyncHandler(async (req, res) => {
+    const {
+        page = 1,
+        limit = 10,
+        sortBy = "createdAt",
+        order = "desc",
+    } = req.query;
+
+    const employees = await Employee.find({ isBlocked: true })
+        .sort({ [sortBy]: order === "desc" ? -1 : 1 })
+        .skip((page - 1) * limit)
+        .limit(Number(limit))
+        .select("-password");
+
+    if (!employees.length) throw new ApiError(404, "No employees found");
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponce(
+                200,
+                { employees, totalEmployees: employees.length },
+                "Employees fetched successfully",
+            ),
+        );
+});
+
 // Delete an employee
 const deleteEmployee = asyncHandler(async (req, res) => {
     const { employeeId } = req.params;
@@ -122,4 +150,5 @@ export {
     toggleEmployeeStatus,
     // bulkUploadEmployees,
     restoreDeletedEmployee,
+    getBlockedEmployees,
 };

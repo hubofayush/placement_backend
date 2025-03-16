@@ -8,6 +8,7 @@ import { verifyAdmin } from "../../middlewares/auth.middleware.js";
 import {
     deleteEmployee,
     getAllEmployees,
+    getBlockedEmployees,
     toggleEmployeeStatus,
 } from "../../controllers/admin/admin.employee.controller.js";
 
@@ -21,6 +22,7 @@ router.route("/auth/updatePassword").patch(verifyAdmin, updateAdminPassword);
 
 // employee routes //
 router.route("/employees").get(verifyAdmin, getAllEmployees);
+router.route("/employees/blocked").get(verifyAdmin, getBlockedEmployees);
 router
     .route("/employees/:employeeId")
     .delete(verifyAdmin, deleteEmployee)
