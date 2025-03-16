@@ -181,6 +181,13 @@ export const verifyJWTEmployer = asyncHandler(async (req, res, next) => {
             "-password -refreshToken",
         );
 
+        if (employer.isBlocked) {
+            throw new ApiError(
+                401,
+                "Your access is Blocked, Try to contact on email",
+            );
+        }
+
         if (!employer) {
             throw new ApiError(401, "invalid user please login or register");
         }
