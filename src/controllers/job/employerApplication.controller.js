@@ -384,6 +384,17 @@ const shortListApplication = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid Id");
     }
 
+    const applicationStatus = await Application.findById(appID);
+    if (!applicationStatus) {
+        throw new ApiError(400, "applicatin not found");
+    }
+
+    applicationStatus.isShortListed = !applicationStatus.isShortListed;
+    applicationStatus.save();
+    const status = !applicationStatus.isShortListed
+        ? "Un Short Listed"
+        : "Shortlisted";
+
     let data = {
         jobApplication: jobID,
         application: appID,
@@ -431,7 +442,7 @@ const shortListApplication = asyncHandler(async (req, res) => {
                 new ApiResponce(
                     200,
                     shortList,
-                    "Application shortlisted successfully",
+                    `application ${status} successfully`,
                 ),
             );
     } else {
@@ -447,7 +458,7 @@ const shortListApplication = asyncHandler(async (req, res) => {
                 new ApiResponce(
                     200,
                     unShortList,
-                    "Application unshortlisted successfully",
+                    `application ${status} successfully`,
                 ),
             );
     }

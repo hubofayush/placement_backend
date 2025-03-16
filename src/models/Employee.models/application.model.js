@@ -18,6 +18,10 @@ const applicationSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "JobApplication",
         },
+        isShortListed: {
+            type: Boolean,
+            default: false,
+        },
     },
     { timestamps: true },
 );

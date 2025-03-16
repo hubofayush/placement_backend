@@ -115,6 +115,24 @@ const viewAdminSingleEmployee = asyncHandler(async (req, res) => {
             },
         },
         {
+            $lookup: {
+                from: "applications",
+                localField: "_id",
+                foreignField: "employee",
+                as: "application",
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "jobapplications",
+                            localField: "jobApplicatoin",
+                            foreignField: "_id",
+                            as: "jobApplication",
+                        },
+                    },
+                ],
+            },
+        },
+        {
             $project: {
                 fName: 1,
                 lName: 1,
@@ -131,6 +149,7 @@ const viewAdminSingleEmployee = asyncHandler(async (req, res) => {
                 isBlocked: 1,
                 blockReason: 1,
                 subscription: 1,
+                application: 1,
             },
         },
     ]);
