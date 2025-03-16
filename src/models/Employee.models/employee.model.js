@@ -78,6 +78,13 @@ const EmployeeSchema = new Schema(
         refreshToken: {
             type: String,
         },
+        isBlocked: {
+            type: Boolean,
+            default: false,
+        },
+        blockReason: {
+            type: String,
+        },
     },
     { timestamps: true },
 );

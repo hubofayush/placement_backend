@@ -28,6 +28,11 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
         const employee = await Employee.findById(decodedToken?._id).select(
             "-password -refreshToken",
         );
+
+        if (employee.isBlocked) {
+            throw new ApiError(401, "You Are Blocked, Contact Company");
+        }
+
         if (!employee) {
             throw new ApiError(401, "invalid user please login or register");
         }
