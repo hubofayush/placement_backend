@@ -1,3 +1,4 @@
 node_modules
 .env
 pipline.txt
+logs/app.log
