@@ -31,6 +31,11 @@ import {
     viewAdminSingleJobApplication,
 } from "../../controllers/admin/admin.jobapplication.controller.js";
 import { advancedSearch } from "../../controllers/admin/admin.search.controller.js";
+import {
+    databaseBackup,
+    databaseRestore,
+    getServerHealth,
+} from "../../controllers/admin/admin.system.controller.js";
 
 const router = new Router();
 
@@ -81,6 +86,12 @@ router
 // advance search //
 router.route("/search").get(verifyAdmin, advancedSearch);
 // end of advance search //
+
+// system routes //
+router.route("/system/backup").post(verifyAdmin, databaseBackup);
+router.route("/system/restore").post(verifyAdmin, databaseRestore);
+router.route("/system/getServerHealth").post(verifyAdmin, getServerHealth);
+// end of system routes //
 // secured routes //
 
 export default router;
