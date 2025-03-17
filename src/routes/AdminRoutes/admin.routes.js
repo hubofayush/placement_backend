@@ -36,6 +36,10 @@ import {
     databaseRestore,
     getServerHealth,
 } from "../../controllers/admin/admin.system.controller.js";
+import {
+    blockIP,
+    unblockIP,
+} from "../../controllers/admin/admin.security.controller.js";
 
 const router = new Router();
 
@@ -92,6 +96,11 @@ router.route("/system/backup").post(verifyAdmin, databaseBackup);
 router.route("/system/restore").post(verifyAdmin, databaseRestore);
 router.route("/system/getServerHealth").post(verifyAdmin, getServerHealth);
 // end of system routes //
+
+// security routes //
+router.route("/security/blockip").post(verifyAdmin, blockIP);
+router.route("/security/unblockip").post(verifyAdmin, unblockIP);
+// end of security routes //
 // secured routes //
 
 export default router;

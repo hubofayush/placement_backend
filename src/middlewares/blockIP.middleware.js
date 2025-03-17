@@ -1,4 +1,4 @@
-const blockedIPs = new Set(); // Store blocked IPs
+import { blockedIPs } from "../constant.js";
 
 // Middleware to block IPs
 export const ipBlockerMiddleware = (req, res, next) => {
@@ -7,10 +7,9 @@ export const ipBlockerMiddleware = (req, res, next) => {
     if (blockedIPs.has(clientIP)) {
         return res.status(403).json({
             success: false,
-            message: "Access denied. Your IP address is blocked."
+            message: "Access denied. Your IP address is blocked.",
         });
     }
 
     next();
 };
-
