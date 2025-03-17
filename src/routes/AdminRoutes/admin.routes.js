@@ -30,6 +30,7 @@ import {
     getDeactiveApplications,
     viewAdminSingleJobApplication,
 } from "../../controllers/admin/admin.jobapplication.controller.js";
+import { advancedSearch } from "../../controllers/admin/admin.search.controller.js";
 
 const router = new Router();
 
@@ -76,6 +77,10 @@ router
     .get(verifyAdmin, viewAdminSingleJobApplication)
     .patch(verifyAdmin, changeApplicationStatus);
 // end of job applications //
+
+// advance search //
+router.route("/search").get(verifyAdmin, advancedSearch);
+// end of advance search //
 // secured routes //
 
 export default router;
