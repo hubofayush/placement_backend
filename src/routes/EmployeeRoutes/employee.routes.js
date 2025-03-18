@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { upload } from "../../middlewares/multer.middleware.js";
+import { upload, uploadPDF } from "../../middlewares/multer.middleware.js";
 import {
     getCurrentUser,
     loginEmployee,
@@ -58,7 +58,12 @@ router
 
 router
     .route("/job/:jobId")
-    .post(verifyJWT, upload.single("resume"), postApplication)
+    .post(
+        verifyJWT,
+        // upload.single("resume"),
+        uploadPDF.single("pdfFile"),
+        postApplication,
+    )
     .get(verifyJWT, viewJobApplication);
 // end of job application routes //
 /**

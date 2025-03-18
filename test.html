@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>PDF Viewer Test</title>
+    </head>
+    <body>
+        <h1>PDF Viewer Test</h1>
+
+        <label for="pdfId">Enter PDF ID:</label>
+        <input
+            type="text"
+            id="pdfId"
+            placeholder="e.g. 1710556589_myfile.pdf"
+        />
+        <button onclick="fetchPDF()">Load PDF</button>
+
+        <div id="pdfContainer" style="margin-top: 20px">
+            <iframe id="pdfViewer" width="100%" height="600px"></iframe>
+        </div>
+
+        <script>
+            async function fetchPDF() {
+                // const pdfId = document.getElementById("pdfId").value;
+                // if (!pdfId) {
+                //     alert("Please enter a valid PDF ID.");
+                //     return;
+                // }
+
+                try {
+                    const response = await fetch(
+                        `http://192.168.43.189:4000/api/v1/emr/job/application/view/67d9177afedd5972ba1bf42c`,
+                    );
+                    const result = await response.json();
+                    console.log(result);
+                    const pdfData = result.data.pdfData;
+                    console.log(pdfData);
+                    if (!result.data) {
+                        alert("Failed to load PDF. Please try again.");
+                        return;
+                    }
+
+                    const pdfViewer = document.getElementById("pdfViewer");
+                    pdfViewer.src = `data:application/pdf;base64,${[pdfData]}`;
+                } catch (error) {
+                    alert("Error fetching PDF: " + error.message);
+                }
+            }
+        </script>
+    </body>
+</html>
