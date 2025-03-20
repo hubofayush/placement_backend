@@ -47,6 +47,39 @@ const EmployeeSchema = new Schema(
             type: Number,
             default: 1,
         },
+        experienceYears: {
+            type: String,
+            enum: {
+                values: ["fresher", "less than 1"],
+            },
+            default: "fresher",
+            required: [true, "Experience required"],
+        },
+        working: {
+            type: Boolean,
+        },
+        salary: {
+            type: Number,
+        },
+        jobRole: {
+            type: String,
+        },
+
+        subDistrict: {
+            type: String,
+        },
+        district: {
+            type: String,
+        },
+        state: {
+            tyep: String,
+        },
+        pincode: {
+            type: String,
+        },
+        currentLocation: {
+            type: String,
+        },
         workExperience: [
             {
                 type: Schema.Types.ObjectId,
