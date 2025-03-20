@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import logClientIP from "./middlewares/LogIP.middleware.js";
+// import logClientIP from "./middlewares/LogIP.middleware.js";
 import { ipBlockerMiddleware } from "./middlewares/blockIP.middleware.js";
 
 const app = express();
@@ -18,7 +18,7 @@ app.use(
 app.use(cookieParser());
 app.use(ipBlockerMiddleware);
 // for loging//
-app.use(logClientIP);
+// app.use(logClientIP);
 // for loging//
 
 // importing routes //
