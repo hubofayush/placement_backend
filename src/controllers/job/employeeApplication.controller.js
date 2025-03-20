@@ -43,21 +43,17 @@ const postApplication = asyncHandler(async (req, res) => {
     if (!jobId) {
         throw new ApiError(400, "job id needed");
     }
-    const resumeLocal = req.file?.path;
-    const resumeLocalPath = resumeLocal;
-    if (!resumeLocalPath) {
-        throw new ApiError(400, "Resume file is required");
-    }
-    // checking if employer applicarion is already present //
-    const oldApplication = await Application.find({
-        employee: new mongoose.Types.ObjectId(req.employee._id),
-        jobApplication: jobId,
-    });
 
-    if (oldApplication) {
-        fs.unlinkSync(resumeLocalPath);
-        throw new ApiError(400, "Cant Upload multiple Application");
-    }
+    // checking if employer applicarion is already present //
+    // const oldApplication = await Application.find({
+    //     employee: new mongoose.Types.ObjectId(req.employee._id),
+    //     jobApplication: jobId,
+    // });
+
+    // if (oldApplication) {
+    //     fs.unlinkSync(resumeLocalPath);
+    //     throw new ApiError(400, "Cant Upload multiple Application");
+    // }
     // end of checking if employer applicarion is already present //
 
     if (!bid) {
@@ -69,17 +65,17 @@ const postApplication = asyncHandler(async (req, res) => {
     if (!job) {
         throw new ApiError(404, "No job found");
     }
-    const resume = await uploadOnCloudinaryPDF(resumeLocalPath);
-    if (!resume) {
-        throw new ApiError(400, "Resume upload failed on cloudinary");
-    }
 
     // console.log(req.employee);
     const newApplication = await Application.create({
         employee: new mongoose.Types.ObjectId(req.employee._id),
         bid: bid,
-        resume: resume.secure_url,
         jobApplication: jobId,
+        pdfData: {
+            name: req.file?.originalname,
+            data: req.file?.buffer,
+            contentType: "application/pdf",
+        },
     });
 
     await job.applications.push(newApplication._id);

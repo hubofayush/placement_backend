@@ -14,6 +14,13 @@ const applicationSchema = new Schema(
         resume: {
             type: String,
         },
+        pdfData: {
+            name: {
+                type: String,
+            },
+            data: Buffer,
+            contentType: String,
+        },
         jobApplication: {
             type: Schema.Types.ObjectId,
             ref: "JobApplication",

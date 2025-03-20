@@ -44,9 +44,7 @@ router.route("/job/toggle/:id").patch(verifyJWTEmployer, changeJobStatus);
 router
     .route("/job/application/:id")
     .get(verifyJWTEmployer, viewJobApplicationsRequests);
-router
-    .route("/job/application/view/:id")
-    .get(verifyJWTEmployer, viewSingleApplication);
+router.route("/job/application/view/:id").get(viewSingleApplication);
 
 // shortlist application //
 router

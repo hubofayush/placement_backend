@@ -9,7 +9,15 @@ const storage = multer.diskStorage({
         cb(null, file.originalname);
     },
 });
+
+const pdfStorage = multer.memoryStorage({
+    filename: function (req, file, cb) {
+        cb(null, file.originalname);
+    },
+});
 export const upload = multer({
     storage,
-    
+});
+export const uploadPDF = multer({
+    pdfStorage,
 });
