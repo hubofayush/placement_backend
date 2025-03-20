@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import logClientIP from "./middlewares/LogIP.middleware.js";
+import { ipBlockerMiddleware } from "./middlewares/blockIP.middleware.js";
 
 const app = express();
 
@@ -31,8 +33,6 @@ import employeeRouter from "./routes/EmployeeRoutes/employee.routes.js";
 
 // **_______EMPLOYER ROUTES_____________*/
 import employerRouter from "./routes/EmployerRoutes/employer.routes.js";
-import logClientIP from "./middlewares/LogIp.middleware.js";
-import { ipBlockerMiddleware } from "./middlewares/blockIP.middleware.js";
 // **_______EMD OF EMPLOYER ROUTES_____________*/
 
 //**_________ ADMIN ROUTES_____________ */
