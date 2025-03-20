@@ -30,11 +30,11 @@
 
                 try {
                     const response = await fetch(
-                        `http://192.168.43.189:4000/api/v1/emr/job/application/view/67d9177afedd5972ba1bf42c`,
+                        `http://172.16.20.29:4000/api/v1/emr/job/application/view/67d9177afedd5972ba1bf42c`,
                     );
                     const result = await response.json();
                     console.log(result);
-                    const pdfData = result.data.pdfData;
+                    const pdfData = result.data.pdfFile;
                     console.log(pdfData);
                     if (!result.data) {
                         alert("Failed to load PDF. Please try again.");

@@ -303,7 +303,7 @@ const viewSingleApplication = asyncHandler(async (req, res) => {
     if (newApplication.length === 0) {
         throw new ApiError(400, "Application Not Found");
     }
-
+    const pdfFile = newApplication[0].pdfData.data.toString("base64");
     // return res.redirect(newApplication[0].resume);
     return res.status(200).json(
         new ApiResponce(
@@ -311,6 +311,7 @@ const viewSingleApplication = asyncHandler(async (req, res) => {
             {
                 newApplication: newApplication,
                 pdfData: newApplication[0].pdfData.data,
+                pdfFile: pdfFile,
             },
             "application found successfully",
         ),
