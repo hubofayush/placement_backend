@@ -5,7 +5,8 @@
     "description": "palcement application backend",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "nodemon src/indes.js"
     },
     "keywords": [
         "nodejs",
@@ -14,7 +15,7 @@
         "mongodb",
         "cloudinary"
     ],
-    "author": "yashodhan,ayush,pundalik,vishwaved",
+    "author": "yashodhan,ayushamberkar03@gmail.com,pundalik,vishwaved",
     "license": "ISC",
     "dependencies": {
         "bcryptjs": "^2.4.3",
@@ -26,9 +27,11 @@
         "fast-two-sms": "^3.0.0",
         "jsonwebtoken": "^9.0.2",
         "mongoose": "^8.6.3",
+        "mongoose-aggregate-paginate-v2": "^1.1.2",
         "multer": "^1.4.5-lts.1",
-        "nodemon": "^3.1.7",
-        "prettier": "^3.3.3"
+        "nodemon": "^3.1.9",
+        "prettier": "^3.3.3",
+        "winston": "^3.17.0"
     },
     "devDependencies": {
         "twilio": "^5.3.1"

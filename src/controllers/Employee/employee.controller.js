@@ -1,11 +1,17 @@
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { ApiError } from "../utils/ApiError.js";
-import { ApiResponce } from "../utils/ApiResponce.js";
-import { Employee } from "../models/Employee.models/employee.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { asyncHandler } from "../../utils/asyncHandler.js";
+import { ApiError } from "../../utils/ApiError.js";
+import { ApiResponce } from "../../utils/ApiResponce.js";
+import { Employee } from "../../models/Employee.models/employee.model.js";
+import { uploadOnCloudinary } from "../../utils/cloudinary.js";
 import mongoose from "mongoose";
-import { Location } from "../models/location.model.js";
-import { Experience } from "../models/Employee.models/experience.model.js";
+import { Location } from "../../models/location.model.js";
+import { Experience } from "../../models/Employee.models/experience.model.js";
+import { EmployeeSubscription } from "../../models/Employee.models/employeesSbscription.model.js";
+import { Employer } from "../../models/Employer.models/employer.model.js";
+import { JobApplication } from "../../models/Employer.models/jobApplication.model.js";
+import { EmployeeNotification } from "../../models/Employee.models/employeeNotification.model.js";
+import logger from "../../utils/logger.js";
+import Api from "twilio/lib/rest/Api.js";
 // import jwt from "jsonwebtoken";
 
 /**
@@ -137,10 +143,12 @@ const Register = asyncHandler(async (req, res) => {
     const {
         fName,
         lName,
+        // fetch
         age,
         gender,
         phone,
         password,
+        // fetch
         dateOfBirth,
         experience,
         position,
@@ -153,7 +161,7 @@ const Register = asyncHandler(async (req, res) => {
     } = req.body;
 
     console.log(fName, lName, password, employed, dateOfBirth);
-    if (!fName || !lName || !password || !employed || !dateOfBirth) {
+    if (!fName || !lName || !password || !employed || !dateOfBirth || !gender) {
         throw new ApiError(404, "Required feilds not filled");
     } else {
     }
@@ -233,14 +241,24 @@ const Register = asyncHandler(async (req, res) => {
         };
         // Create location records with references to employee //
 
+        // create subscription data //
+        const subscriptionData = {
+            employee: empId,
+            subscriptionType: "free",
+        };
+        // end of create subscription data //
+
         // Create experience,location records with references to employee //
-        const [experienceRecords, locationRecords] = await Promise.all([
-            Experience.insertMany(experienceData, { session }),
-            Location.insertMany(locationData, { session }),
-        ]);
+        const [experienceRecords, locationRecords, subscriptionRecords] =
+            await Promise.all([
+                Experience.insertMany(experienceData, { session }),
+                Location.insertMany(locationData, { session }),
+                EmployeeSubscription.insertMany(subscriptionData, { session }),
+            ]);
 
         newEmployee[0].workExperience = experienceRecords.map((exp) => exp._id);
         newEmployee[0].location = locationRecords.map((loc) => loc._id);
+        newEmployee[0].subscription = subscriptionRecords.map((sub) => sub._id);
         await newEmployee[0].save({ session });
 
         // Create experience,location records with references to employee //
@@ -313,9 +331,78 @@ const loginEmployee = asyncHandler(async (req, res) => {
     // end of generating tolens by id //
 
     // getting new employee with refresh token //
-    const employeeReturn = await Employee.findById(findEmployee._id).select(
-        "-password -refreshToken",
-    );
+    // const employeeReturn = await Employee.findById(findEmployee._id).select(
+    //     "-password -refreshToken",
+    // );
+    const employeeReturn = await Employee.aggregate([
+        {
+            $match: {
+                _id: findEmployee?._id,
+            },
+        },
+        {
+            $lookup: {
+                from: "locations",
+                localField: "location",
+                foreignField: "_id",
+                as: "locations",
+                pipeline: [
+                    {
+                        $project: {
+                            state: 1,
+                            district: 1,
+                            subDistrict: 1,
+                            pincode: 1,
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            $lookup: {
+                from: "experiences",
+                localField: "workExperience",
+                foreignField: "_id",
+                as: "experiences",
+                pipeline: [
+                    {
+                        $project: {
+                            yearOfExperience: 1,
+                            working: 1,
+                            salary: 1,
+                            jobRole: 1,
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            $lookup: {
+                from: "employeeSubscriptions",
+                localField: "subscription",
+                foreignField: "_id",
+                as: "sunscriptions",
+            },
+        },
+        {
+            $project: {
+                _id: 1,
+                fName: 1,
+                lName: 1,
+                phone: 1,
+                age: 1,
+                dateOfBirth: 1,
+                gender: 1,
+                email: 1,
+                avatar: 1,
+                leades: 1,
+                education: 1,
+                locations: 1,
+                experiences: 1,
+                subscriptions: 1,
+            },
+        },
+    ]);
     // getting new employee with refresh token //
 
     // setting options for cookies //
@@ -324,7 +411,8 @@ const loginEmployee = asyncHandler(async (req, res) => {
         secure: true,
     };
     // end of setting options for cookies //
-
+    console.log("employee");
+    logger.info(`Login attempt from IP: ${req.ip} with phone: ${phone}`);
     // sending responce  //
     return res
         .status(200)
@@ -425,7 +513,7 @@ const updatePassword = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .json(new ApiResponce(200, employee, "Password Changed"));
+        .json(new ApiResponce(200, {}, "Password Changed successfully"));
 });
 /**
  * _____________END OF CHANGE PASSWORD____________
@@ -489,7 +577,293 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 /**
  * _____END OF check current user________
  */
+/**
+ * ________ SEARCH _______
+ */
+const search = asyncHandler(async (req, res) => {
+    const { q, limit = 10, page = 1, sortBy, sortType } = req.query;
 
+    const parseLimit = parseInt(limit);
+    const pageSkip = (page - 1) * parseLimit;
+    const sortStage = {};
+    sortStage[sortBy] = sortType === "asc" ? 1 : -1;
+    console.log(sortStage);
+    if (!q) {
+        throw new ApiError(400, "Company name Required");
+    }
+
+    // aggrigation pipeline for finding company//
+    const company = await Employer.aggregate([
+        {
+            $match: {
+                $or: [
+                    {
+                        name: {
+                            $regex: `${q}`,
+                            $options: "i",
+                        },
+                    },
+                    {
+                        location: {
+                            $regex: `${q}`,
+                            $options: "i",
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            $lookup: {
+                from: "jobapplications",
+                localField: "_id",
+                foreignField: "owner",
+                as: "applications",
+                pipeline: [
+                    {
+                        $match: {
+                            active: true,
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            $addFields: {
+                numberOfActive: {
+                    $size: "$applications",
+                },
+            },
+        },
+        {
+            $project: {
+                name: 1,
+                location: 1,
+                numberOfActive: 1,
+            },
+        },
+        {
+            $limit: parseLimit,
+        },
+        {
+            $skip: pageSkip,
+        },
+        {
+            $sort: sortStage,
+        },
+    ]);
+    // end of aggrigation pipeline for finding company//
+
+    const jobApplications = await JobApplication.aggregate([
+        {
+            $match: {
+                $or: [
+                    {
+                        title: {
+                            $regex: `${q}`,
+                            $options: "i",
+                        },
+                    },
+
+                    {
+                        companyName: {
+                            $regex: `${q}`,
+                            $options: "i",
+                        },
+                    },
+
+                    {
+                        qualification: {
+                            $regex: `${q}`,
+                            $options: "i",
+                        },
+                    },
+
+                    {
+                        location: {
+                            $regex: `${q}`,
+                            $options: "i",
+                        },
+                    },
+                    {
+                        salaryRange: {
+                            $regex: `${q}`,
+                            $options: "i",
+                        },
+                    },
+                ],
+                active: true,
+            },
+        },
+        {
+            $project: {
+                title: 1,
+                location: 1,
+                salaryRange: 1,
+                qualification: 1,
+                companyName: 1,
+                closeDate: 1,
+            },
+        },
+        {
+            $limit: parseLimit,
+        },
+        {
+            $skip: pageSkip,
+        },
+        {
+            $sort: sortStage,
+        },
+    ]);
+    // end of finding job applications realted to search //
+    return res.status(200).json(
+        new ApiResponce(
+            200,
+            {
+                company: company,
+                jobApplications: jobApplications,
+            },
+            "Company details found succsessfully",
+        ),
+    );
+});
+/**
+ * ________ SEARCH _______
+ */
+/**
+ * ____________View Company Profile_________
+ */
+const viewCompany = asyncHandler(async (req, res) => {
+    const { companyId } = req.params;
+    if (!companyId) {
+        throw new ApiError(400, "Company Id required");
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(companyId)) {
+        throw new ApiError(400, "Wrong id");
+    }
+
+    const company = await Employer.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(companyId),
+            },
+        },
+        {
+            $lookup: {
+                from: "jobapplications",
+                localField: "_id",
+                foreignField: "owner",
+                as: "applications",
+                pipeline: [
+                    {
+                        $match: {
+                            active: true,
+                        },
+                    },
+                ],
+            },
+        },
+        {
+            $project: {
+                name: 1,
+                location: 1,
+                email: 1,
+                applications: 1,
+                logo: 1,
+            },
+        },
+    ]);
+
+    if (company.length === 0) {
+        throw new ApiError(400, "Invalid Id, Company Not Found");
+    }
+
+    return res.status(200).json(new ApiResponce(200, company, "Company Found"));
+});
+/**
+ * ____________ END OF View Company Profile_________
+ */
+
+// view all notificatin //
+const viewNotifications = asyncHandler(async (req, res) => {
+    const notifications = await EmployeeNotification.find({
+        employee: req.employee._id,
+        read: false,
+    });
+    if (!notifications) {
+        throw new ApiError(400, "no Notificatins");
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponce(200, notifications, "Notifiactions"));
+});
+// end of view all notificatin //
+
+// view single Notification //
+const readNotifiaction = asyncHandler(async (req, res) => {
+    const notificationId = req.params.id;
+
+    if (!notificationId) {
+        throw new ApiError(400, "Notification ID Required");
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(notificationId)) {
+        throw new ApiError(400, "Invalid notifiaction ID");
+    }
+
+    const notification = await EmployeeNotification.findByIdAndUpdate(
+        notificationId,
+        {
+            $set: {
+                read: true,
+            },
+        },
+        {
+            $new: true,
+        },
+    );
+    if (!notification) {
+        throw new ApiError(400, "Not Readed Notification");
+    }
+
+    const notificationData = await EmployeeNotification.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(notificationId),
+            },
+        },
+        {
+            $lookup: {
+                from: "applications",
+                localField: "applicationId",
+                foreignField: "_id",
+                as: "application",
+                pipeline: [
+                    {
+                        $lookup: {
+                            from: "jobapplications",
+                            foreignField: "_id",
+                            localField: "jobApplication",
+                            as: "jobApplication",
+                        },
+                    },
+                ],
+            },
+        },
+    ]);
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponce(
+                200,
+                { notification, notificationData: notificationData[0] },
+                "Notification Red",
+            ),
+        );
+});
+// end of view single Notification //
 /**
  * _________ Exporting functions ___________S
  */
@@ -500,6 +874,10 @@ export {
     getCurrentUser,
     updateEmployee,
     updatePassword,
+    search,
+    viewCompany,
+    viewNotifications,
+    readNotifiaction,
 };
 /**
  * ____ END OF exprting function_________

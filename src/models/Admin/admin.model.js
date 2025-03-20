@@ -1,5 +1,8 @@
 import mongoose, { Schema } from "mongoose";
 
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+
 const AdminSchema = new Schema(
     {
         // Basic Admin Details
@@ -16,8 +19,6 @@ const AdminSchema = new Schema(
         },
         phone: {
             type: String,
-            required: true,
-            unique: true,
         },
         password: {
             type: String,
@@ -75,10 +76,54 @@ const AdminSchema = new Schema(
                 },
             },
         ],
+        refreshToken: {
+            type: String,
+        },
     },
     { timestamps: true },
 );
 
-const Admin = mongoose.model("Admin", AdminSchema);
+// hash password //
+AdminSchema.pre("save", async function (next) {
+    if (!this.isModified("password")) return next();
 
-module.exports = Admin;
+    this.password = await bcrypt.hash(this.password, 10);
+    next();
+});
+
+// to check password is correct
+AdminSchema.methods.isPasswordCorrect = async function (password) {
+    return await bcrypt.compare(password, this.password);
+};
+// end of check password is correct
+
+// making the access token //
+AdminSchema.methods.generateAccessToken = async function () {
+    return jwt.sign(
+        {
+            _id: this._id,
+            type: "admin",
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        {
+            expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
+        },
+    );
+};
+// making the access token //
+
+// making refresh token //
+AdminSchema.methods.generateRefreshToken = function () {
+    return jwt.sign(
+        {
+            _id: this._id,
+            type: "admin",
+        },
+        process.env.REFRESH_TOKEN_SECRET,
+        {
+            expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
+        },
+    );
+};
+// making refresh token //
+export const Admin = mongoose.model("Admin", AdminSchema);

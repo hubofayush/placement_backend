@@ -14,6 +14,10 @@ app.use(
     }),
 );
 app.use(cookieParser());
+app.use(ipBlockerMiddleware);
+// for loging//
+app.use(logClientIP);
+// for loging//
 
 // importing routes //
 
@@ -22,8 +26,18 @@ import sendOtpRouter from "./routes/sendOTP.Routes.js";
 //**________END OF SATNDARD ROUTES______________ */
 
 //**________EMPLOYEE ROUTES______________ */
-import employeeRouter from "./routes/employee.routes.js";
+import employeeRouter from "./routes/EmployeeRoutes/employee.routes.js";
 //**________END OF EMPLOYEE ROUTES______________ */
+
+// **_______EMPLOYER ROUTES_____________*/
+import employerRouter from "./routes/EmployerRoutes/employer.routes.js";
+import logClientIP from "./middlewares/LogIp.middleware.js";
+import { ipBlockerMiddleware } from "./middlewares/blockIP.middleware.js";
+// **_______EMD OF EMPLOYER ROUTES_____________*/
+
+//**_________ ADMIN ROUTES_____________ */
+import adminRoute from "./routes/AdminRoutes/admin.routes.js";
+//**_________ END OF ADMIN ROUTES_____________ */
 // end of importing routes
 
 // apis / routes
@@ -37,5 +51,13 @@ app.use("/api/v1/emp", employeeRouter);
 // end of register route //
 
 // end of employee routes //
+
+// employer Routes //
+app.use("/api/v1/emr", employerRouter);
+// end of employer Routes //
+
+// admin routes //
+app.use("/api/v1/admin", adminRoute);
+// end of admin routes //
 
 export { app };
