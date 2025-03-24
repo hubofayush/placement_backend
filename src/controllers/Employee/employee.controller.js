@@ -161,7 +161,7 @@ const Register = asyncHandler(async (req, res) => {
     } = req.body;
 
     console.log(fName, lName, password, employed, dateOfBirth);
-    if (!fName || !lName || !password || !employed || !dateOfBirth || !gender) {
+    if (!fName || !lName || !password || !dateOfBirth || !gender) {
         throw new ApiError(404, "Required feilds not filled");
     } else {
     }
@@ -214,7 +214,7 @@ const Register = asyncHandler(async (req, res) => {
                     avatar: avatar.url,
                     education: education,
                     experienceYears: experience,
-                    working: employed,
+                    working: employed ?? false,
                     salary: salary,
                     jobRole: position,
                     subDistrict: division,
