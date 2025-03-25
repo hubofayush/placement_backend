@@ -118,6 +118,9 @@ const EmployeeSchema = new Schema(
         blockReason: {
             type: String,
         },
+        tred: {
+            type: String,
+        },
     },
     { timestamps: true },
 );

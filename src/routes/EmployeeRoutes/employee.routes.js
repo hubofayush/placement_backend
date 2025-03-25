@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import { upload, uploadPDF } from "../../middlewares/multer.middleware.js";
 import {
+    getAllCompanies,
     getCurrentUser,
     loginEmployee,
     logoutEmployee,
@@ -30,6 +31,7 @@ import {
 router.route("/register").post(upload.single("avatar"), Register);
 router.route("/login").post(loginEmployee);
 router.route("/").get(getAllApplications);
+router.route("/employers").get(getAllCompanies);
 /**
  *  END OF INSECURED ROUTES
  */

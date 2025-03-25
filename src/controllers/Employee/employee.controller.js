@@ -158,6 +158,7 @@ const Register = asyncHandler(async (req, res) => {
         district,
         division,
         pincode,
+        tred,
     } = req.body;
 
     console.log(fName, lName, password, employed, dateOfBirth);
@@ -222,6 +223,7 @@ const Register = asyncHandler(async (req, res) => {
                     district: district,
                     state: "Maharashtra",
                     pincode: pincode,
+                    tred: tred,
                 },
             ],
             { session },
@@ -332,6 +334,7 @@ const loginEmployee = asyncHandler(async (req, res) => {
     const isPasswordValid = await findEmployee.isPasswordCorrect(password);
     if (!isPasswordValid) {
         throw new ApiError(401, "invalid password");
+        // res.send(new ApiResponce(400, [], "invalid Password"));
     }
     // end of checking passoword is correct or not //
 
@@ -414,6 +417,7 @@ const loginEmployee = asyncHandler(async (req, res) => {
                 division: 1,
                 experienceYears: 1,
                 working: 1,
+                tred: 1,
             },
         },
     ]);
@@ -550,6 +554,7 @@ const updateEmployee = asyncHandler(async (req, res) => {
         salary,
         jobRole,
         division,
+        tred,
     } = req.body;
 
     const employeeDetails = await Employee.findById(req.employee?._id);
@@ -570,6 +575,7 @@ const updateEmployee = asyncHandler(async (req, res) => {
                 jobRole: jobRole ?? employeeDetails.jobRole,
                 division: division ?? employeeDetails.division,
                 currentLocation: division ?? employeeDetails.division,
+                tred: tred ?? employeeDetails.tred,
             },
         },
         {
@@ -817,6 +823,17 @@ const viewCompany = asyncHandler(async (req, res) => {
  * ____________ END OF View Company Profile_________
  */
 
+// fet all companies //
+const getAllCompanies = asyncHandler(async (req, res) => {
+    const companies = await Employer.find().select("name location logo");
+    return res
+        .status(200)
+        .json(
+            new ApiResponce(200, companies, "Companies Fetched Successfully"),
+        );
+});
+// fet all companies //
+
 // view all notificatin //
 const viewNotifications = asyncHandler(async (req, res) => {
     const notifications = await EmployeeNotification.find({
@@ -911,6 +928,7 @@ export {
     viewCompany,
     viewNotifications,
     readNotifiaction,
+    getAllCompanies,
 };
 /**
  * ____ END OF exprting function_________
