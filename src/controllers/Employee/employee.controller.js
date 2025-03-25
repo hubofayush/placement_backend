@@ -409,6 +409,11 @@ const loginEmployee = asyncHandler(async (req, res) => {
                 locations: 1,
                 experiences: 1,
                 subscriptions: 1,
+                currentLocation: 1,
+                district: 1,
+                division: 1,
+                experienceYears: 1,
+                working: 1,
             },
         },
     ]);
