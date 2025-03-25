@@ -73,7 +73,6 @@ const EmployeeSchema = new Schema(
         },
         state: {
             tyep: String,
-            default: "Maharashtra",
         },
         pincode: {
             type: String,
