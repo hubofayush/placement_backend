@@ -50,7 +50,7 @@ const EmployeeSchema = new Schema(
         experienceYears: {
             type: String,
             enum: {
-                values: ["fresher", "less than 1"],
+                values: ["fresher", "less than 1", "2 to 5 years", "above 5"],
             },
             default: "fresher",
             required: [true, "Experience required"],
@@ -65,7 +65,7 @@ const EmployeeSchema = new Schema(
             type: String,
         },
 
-        subDistrict: {
+        division: {
             type: String,
         },
         district: {
@@ -73,6 +73,7 @@ const EmployeeSchema = new Schema(
         },
         state: {
             tyep: String,
+            default: "Maharashtra",
         },
         pincode: {
             type: String,

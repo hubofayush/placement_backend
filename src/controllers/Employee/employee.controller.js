@@ -534,20 +534,37 @@ const updatePassword = asyncHandler(async (req, res) => {
 // TODO: update employeee function
 // FIXME: test this end point
 const updateEmployee = asyncHandler(async (req, res) => {
-    const { name, lastName, mobile, email, adress } = req.body;
+    const {
+        name,
+        lastName,
+        email,
+        age,
+        gender,
+        experienceYears,
+        working,
+        salary,
+        jobRole,
+        division,
+    } = req.body;
 
-    if (!(name, lastName, mobile, email)) {
-        throw new ApiError(400, "Feild Required");
-    }
+    const employeeDetails = await Employee.findById(req.employee?._id);
 
     const employee = await Employee.findByIdAndUpdate(
         req.employee?._id,
         {
             $set: {
-                fName: name,
-                lName: lastName,
-                email: email,
-                phone: mobile,
+                fName: name ?? employeeDetails.fName,
+                lName: lastName ?? employeeDetails.fName,
+                email: email ?? employeeDetails.email,
+                age: age ?? employeeDetails.age,
+                gender: gender ?? employeeDetails.gender,
+                experienceYears:
+                    experienceYears ?? employeeDetails.experienceYears,
+                working: working ?? employeeDetails.working,
+                salary: salary ?? employeeDetails.salary,
+                jobRole: jobRole ?? employeeDetails.jobRole,
+                division: division ?? employeeDetails.division,
+                currentLocation: division ?? employeeDetails.division,
             },
         },
         {
@@ -555,13 +572,15 @@ const updateEmployee = asyncHandler(async (req, res) => {
         },
     );
 
+    const newEmployee = await Employee.findById(req.employee?._id);
+
     if (!employee) {
         throw new ApiError(401, "Error on finding error");
     }
 
     return res
         .status(200)
-        .json(new ApiResponce(200, employee, "Updated successfully"));
+        .json(new ApiResponce(200, newEmployee, "Updated successfully"));
 });
 /**
  * ________END OF UPDATE USER________
