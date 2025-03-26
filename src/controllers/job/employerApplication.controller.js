@@ -480,21 +480,20 @@ const shortListApplication = asyncHandler(async (req, res) => {
         const newshortlistedApplication =
             await ShortlistedApplication.findOne(data);
 
+        // notifiaction //
+        const empInfo = await Application.findById(appID);
+        if (!empInfo) {
+            throw new ApiError(400, "Application Not Found, Try again");
+        }
+
+        const jobInfo = await JobApplication.findById(jobID);
+        if (!jobInfo) {
+            throw new ApiError(400, "Job Applicaitn Not Found, Try again");
+        }
         if (!newshortlistedApplication) {
             const shortList = await ShortlistedApplication.create(data);
             if (!shortList) {
                 throw new ApiError(404, " shortlisting application error");
-            }
-
-            // notifiaction //
-            const empInfo = await Application.findById(appID);
-            if (!empInfo) {
-                throw new ApiError(400, "Application Not Found, Try again");
-            }
-
-            const jobInfo = await JobApplication.findById(jobID);
-            if (!jobInfo) {
-                throw new ApiError(400, "Job Applicaitn Not Found, Try again");
             }
 
             console.log(empInfo);
@@ -525,6 +524,19 @@ const shortListApplication = asyncHandler(async (req, res) => {
         } else {
             const unShortList =
                 await ShortlistedApplication.findOneAndDelete(data);
+            const newNotification = await EmployeeNotification.create({
+                employee: new mongoose.Types.ObjectId(empInfo.employee),
+                employer: new mongoose.Types.ObjectId(req.employer._id),
+                title: "Application Rejected",
+                message: `Your Application Rejected for ${jobInfo.title} by ${req.employer?.name} 
+                  `,
+                read: false,
+                applicationId: new mongoose.Types.ObjectId(appID),
+            });
+
+            if (!newNotification) {
+                throw new ApiError(400, "notifiaction not send to employee");
+            }
 
             if (!unShortList) {
                 throw new ApiError(404, "unshortlisting application error");

@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import { upload, uploadPDF } from "../../middlewares/multer.middleware.js";
 import {
+    deleteEmployee,
     getAllCompanies,
     getCurrentUser,
     loginEmployee,
@@ -48,6 +49,7 @@ router.route("/search").get(verifyJWT, search);
 router.route("/search/company/:companyId").get(verifyJWT, viewCompany);
 router.route("/notifications").get(verifyJWT, viewNotifications);
 router.route("/notification/:id").patch(verifyJWT, readNotifiaction);
+router.route("/delete").delete(verifyJWT, deleteEmployee);
 
 // job application routes //
 router.route("/job/myapplicatons").get(verifyJWT, viewMyApplications);
