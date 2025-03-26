@@ -10,6 +10,10 @@ import { EmployeeSubscription } from "../../models/Employee.models/employeesSbsc
 import { Employer } from "../../models/Employer.models/employer.model.js";
 import { JobApplication } from "../../models/Employer.models/jobApplication.model.js";
 import { EmployeeNotification } from "../../models/Employee.models/employeeNotification.model.js";
+import { AwsInstance } from "twilio/lib/rest/accounts/v1/credential/aws.js";
+import { json } from "stream/consumers";
+import { Application } from "../../models/Employee.models/application.model.js";
+import { application } from "express";
 // import logger from "../../utils/logger.js";
 // import Api from "twilio/lib/rest/Api.js";
 // import jwt from "jsonwebtoken";
@@ -644,7 +648,65 @@ const updateEmployee = asyncHandler(async (req, res) => {
 /**
  * ________END OF UPDATE USER________
  */
+/**
+ * _____________ Delete Employee ___________
+ */
+const deleteEmployee = asyncHandler(async (req, res) => {
+    try {
+        // find subsciprion and delete
+        const subscriptionData = await EmployeeSubscription.findByIdAndDelete(
+            req.employee?.subscription,
+        );
+        if (!subscriptionData) {
+            throw new ApiError(401, "subscription not found or not deleted");
+        }
 
+        const locationData = await Location.findByIdAndDelete(
+            req.employee?.location,
+        );
+        if (!locationData) {
+            throw new ApiError(401, "user Location not found or not deleted");
+        }
+
+        const experirceData = await Experience.findByIdAndDelete(
+            req.employee?.workExperience,
+        );
+        if (!experirceData) {
+            throw new ApiError(401, "experience not found or not deleted");
+        }
+
+        let endapplication = false;
+        if (!endapplication) {
+            let applicationFound = await Application.findOneAndDelete({
+                employee: req.employee._id,
+            });
+
+            if (!applicationFound) {
+                endapplication = true;
+            }
+        }
+
+        const deletedEmployee = await Employee.findByIdAndDelete(
+            req.employee._id,
+        );
+        if (!deletedEmployee) {
+            throw new ApiError(404, "Employee not deleted");
+        }
+
+        return res
+            .status(200)
+            .json(new ApiResponce(200, null, "Employee deleted successfully"));
+    } catch (error) {
+        const statusCode = error.statusCode || 500;
+        const message = error.message || "Internal server error";
+        return res
+            .status(statusCode)
+            .json(new ApiResponce(statusCode, null, message));
+    }
+});
+/**
+ * _____________END OF Delete Employee ___________
+ */
 /**
  * _____ check current user________
  */
@@ -929,7 +991,7 @@ const viewNotifications = asyncHandler(async (req, res) => {
     try {
         const notifications = await EmployeeNotification.find({
             employee: req.employee._id,
-        });
+        }).sort({ createdAt: -1 });
         if (!notifications) {
             throw new ApiError(400, "no Notificatins");
         }
@@ -1036,6 +1098,7 @@ export {
     viewNotifications,
     readNotifiaction,
     getAllCompanies,
+    deleteEmployee,
 };
 /**
  * ____ END OF exprting function_________
