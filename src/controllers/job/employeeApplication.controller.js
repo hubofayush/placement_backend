@@ -6,6 +6,7 @@ import mongoose, { mongo, Mongoose } from "mongoose";
 import { Application } from "../../models/Employee.models/application.model.js";
 import { uploadOnCloudinaryPDF } from "../../utils/cloudinary.js";
 import fs from "fs";
+import { ShortlistedApplication } from "../../models/Employer.models/shortlistedApplication.model.js";
 
 // get all aplications //
 const getAllApplications = asyncHandler(async (req, res) => {
@@ -428,6 +429,13 @@ const deletedApplication = asyncHandler(async (req, res) => {
             await Application.findById(applicationId).exec();
         if (!applicationFound) {
             throw new ApiError(404, "No application found with this ID");
+        }
+
+        const shortlistedData = await ShortlistedApplication.findOneAndDelete({
+            application: applicationFound._id,
+        });
+        if (shortlistedData) {
+            throw new ApiError(404, "no Shortlisted application found");
         }
 
         // 3. Find the associated JobApplication and update its applications array
