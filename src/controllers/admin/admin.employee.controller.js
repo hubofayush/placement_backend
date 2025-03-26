@@ -8,200 +8,249 @@ import fs from "fs";
 
 // View all employees
 const getAllEmployees = asyncHandler(async (req, res) => {
-    const {
-        page = 1,
-        limit = 10,
-        sortBy = "createdAt",
-        order = "desc",
-    } = req.query;
+    try {
+        const {
+            page = 1,
+            limit = 10,
+            sortBy = "createdAt",
+            order = "desc",
+        } = req.query;
 
-    const employees = await Employee.find()
-        .sort({ [sortBy]: order === "desc" ? -1 : 1 })
-        .skip((page - 1) * limit)
-        .limit(Number(limit))
-        .select("-password");
+        const employees = await Employee.find()
+            .sort({ [sortBy]: order === "desc" ? -1 : 1 })
+            .skip((page - 1) * limit)
+            .limit(Number(limit))
+            .select("-password");
 
-    if (!employees.length) throw new ApiError(404, "No employees found");
+        if (!employees.length) throw new ApiError(404, "No employees found");
 
-    return res
-        .status(200)
-        .json(
-            new ApiResponce(
-                200,
-                { employees, totalEmployees: employees.length },
-                "Employees fetched successfully",
-            ),
-        );
+        return res
+            .status(200)
+            .json(
+                new ApiResponce(
+                    200,
+                    { employees, totalEmployees: employees.length },
+                    "Employees fetched successfully",
+                ),
+            );
+    } catch (error) {
+        // Centralized error handling
+        const statusCode = error.statusCode || 500;
+        const message = error.message || "Internal server error";
+        return res
+            .status(statusCode)
+            .json(new ApiResponce(statusCode, null, message));
+    }
 });
 
 // get blocked employees
 const getBlockedEmployees = asyncHandler(async (req, res) => {
-    const {
-        page = 1,
-        limit = 10,
-        sortBy = "createdAt",
-        order = "desc",
-    } = req.query;
+    try {
+        const {
+            page = 1,
+            limit = 10,
+            sortBy = "createdAt",
+            order = "desc",
+        } = req.query;
 
-    const employees = await Employee.find({ isBlocked: true })
-        .sort({ [sortBy]: order === "desc" ? -1 : 1 })
-        .skip((page - 1) * limit)
-        .limit(Number(limit))
-        .select("-password");
+        const employees = await Employee.find({ isBlocked: true })
+            .sort({ [sortBy]: order === "desc" ? -1 : 1 })
+            .skip((page - 1) * limit)
+            .limit(Number(limit))
+            .select("-password");
 
-    if (!employees.length) throw new ApiError(404, "No employees found");
+        if (!employees.length) throw new ApiError(404, "No employees found");
 
-    return res
-        .status(200)
-        .json(
-            new ApiResponce(
-                200,
-                { employees, totalEmployees: employees.length },
-                "Employees fetched successfully",
-            ),
-        );
+        return res
+            .status(200)
+            .json(
+                new ApiResponce(
+                    200,
+                    { employees, totalEmployees: employees.length },
+                    "Employees fetched successfully",
+                ),
+            );
+    } catch (error) {
+        // Centralized error handling
+        const statusCode = error.statusCode || 500;
+        const message = error.message || "Internal server error";
+        return res
+            .status(statusCode)
+            .json(new ApiResponce(statusCode, null, message));
+    }
 });
 
 // view single employee
 const viewAdminSingleEmployee = asyncHandler(async (req, res) => {
-    const { employeeId } = req.params;
+    try {
+        const { employeeId } = req.params;
 
-    if (!employeeId) {
-        throw new ApiError(400, "Employee ID required");
-    }
+        if (!employeeId) {
+            throw new ApiError(400, "Employee ID required");
+        }
 
-    if (!mongoose.Types.ObjectId.isValid(employeeId)) {
-        throw new ApiError(400, "Wrong ID");
-    }
+        if (!mongoose.Types.ObjectId.isValid(employeeId)) {
+            throw new ApiError(400, "Wrong ID");
+        }
 
-    const employee = await Employee.aggregate([
-        {
-            $match: {
-                _id: new mongoose.Types.ObjectId(employeeId),
+        const employee = await Employee.aggregate([
+            {
+                $match: {
+                    _id: new mongoose.Types.ObjectId(employeeId),
+                },
             },
-        },
-        {
-            $lookup: {
-                from: "experiences",
-                localField: "_id",
-                foreignField: "employee",
-                as: "experience",
+            {
+                $lookup: {
+                    from: "experiences",
+                    localField: "_id",
+                    foreignField: "employee",
+                    as: "experience",
+                },
             },
-        },
-        {
-            $lookup: {
-                from: "locations",
-                localField: "location",
-                foreignField: "_id",
-                as: "currentLocation",
-                pipeline: [
-                    {
-                        $project: {
-                            state: 1,
-                            district: 1,
-                            subDistrict: 1,
-                            pincode: 1,
+            {
+                $lookup: {
+                    from: "locations",
+                    localField: "location",
+                    foreignField: "_id",
+                    as: "currentLocation",
+                    pipeline: [
+                        {
+                            $project: {
+                                state: 1,
+                                district: 1,
+                                subDistrict: 1,
+                                pincode: 1,
+                            },
                         },
-                    },
-                ],
+                    ],
+                },
             },
-        },
-        {
-            $lookup: {
-                from: "employeesubscriptions",
-                localField: "subscription",
-                foreignField: "_id",
-                as: "subscription",
+            {
+                $lookup: {
+                    from: "employeesubscriptions",
+                    localField: "subscription",
+                    foreignField: "_id",
+                    as: "subscription",
+                },
             },
-        },
-        {
-            $lookup: {
-                from: "applications",
-                localField: "_id",
-                foreignField: "employee",
-                as: "application",
-                pipeline: [
-                    {
-                        $lookup: {
-                            from: "jobapplications",
-                            localField: "jobApplicatoin",
-                            foreignField: "_id",
-                            as: "jobApplication",
+            {
+                $lookup: {
+                    from: "applications",
+                    localField: "_id",
+                    foreignField: "employee",
+                    as: "application",
+                    pipeline: [
+                        {
+                            $lookup: {
+                                from: "jobapplications",
+                                localField: "jobApplicatoin",
+                                foreignField: "_id",
+                                as: "jobApplication",
+                            },
                         },
-                    },
-                ],
+                    ],
+                },
             },
-        },
-        {
-            $project: {
-                fName: 1,
-                lName: 1,
-                phone: 1,
-                age: 1,
-                education: 1,
-                experience: 1,
-                gender: 1,
-                avatar: 1,
-                currentLocation: 1,
-                dateOfBirth: 1,
-                leades: 1,
-                refreshToken: 1,
-                isBlocked: 1,
-                blockReason: 1,
-                subscription: 1,
-                application: 1,
+            {
+                $project: {
+                    fName: 1,
+                    lName: 1,
+                    phone: 1,
+                    age: 1,
+                    education: 1,
+                    experience: 1,
+                    gender: 1,
+                    avatar: 1,
+                    currentLocation: 1,
+                    dateOfBirth: 1,
+                    leades: 1,
+                    refreshToken: 1,
+                    isBlocked: 1,
+                    blockReason: 1,
+                    subscription: 1,
+                    application: 1,
+                },
             },
-        },
-    ]);
+        ]);
 
-    if (employee.length === 0) {
-        throw new ApiError(400, "Invalid ID, please try again");
+        if (employee.length === 0) {
+            throw new ApiError(400, "Invalid ID, please try again");
+        }
+
+        return res
+            .status(200)
+            .json(new ApiResponce(200, employee, "Employee Found"));
+    } catch (error) {
+        // Centralized error handling
+        const statusCode = error.statusCode || 500;
+        const message = error.message || "Internal server error";
+        return res
+            .status(statusCode)
+            .json(new ApiResponce(statusCode, null, message));
     }
-
-    return res
-        .status(200)
-        .json(new ApiResponce(200, employee, "Employee Found"));
 });
 
 // Delete an employee
 const deleteEmployee = asyncHandler(async (req, res) => {
-    const { employeeId } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(employeeId))
-        throw new ApiError(400, "Invalid Employee ID");
+    try {
+        const { employeeId } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(employeeId))
+            throw new ApiError(400, "Invalid Employee ID");
 
-    const employee = await Employee.findByIdAndDelete(employeeId);
-    if (!employee) throw new ApiError(404, "Employee not found");
+        const employee = await Employee.findByIdAndDelete(employeeId);
+        if (!employee) throw new ApiError(404, "Employee not found");
 
-    return res
-        .status(200)
-        .json(new ApiResponce(200, {}, "Employee deleted successfully"));
+        return res
+            .status(200)
+            .json(new ApiResponce(200, {}, "Employee deleted successfully"));
+    } catch (error) {
+        // Centralized error handling
+        const statusCode = error.statusCode || 500;
+        const message = error.message || "Internal server error";
+        return res
+            .status(statusCode)
+            .json(new ApiResponce(statusCode, null, message));
+    }
 });
 
 // Block/Unblock Employee
 const toggleEmployeeStatus = asyncHandler(async (req, res) => {
-    const { employeeId } = req.params;
-    const { reason } = req.body;
+    try {
+        const { employeeId } = req.params;
+        const { reason } = req.body;
 
-    if (!employeeId) {
-        throw new ApiError(400, "Employee id required");
+        if (!employeeId) {
+            throw new ApiError(400, "Employee id required");
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(employeeId))
+            throw new ApiError(400, "Invalid Employee ID");
+
+        const employee = await Employee.findById(employeeId);
+        if (!employee) throw new ApiError(404, "Employee not found");
+
+        employee.isBlocked = !employee.isBlocked;
+        employee.blockReason = reason || "No reason provided";
+        await employee.save({ validateBeforeSave: false });
+
+        const status = employee.isBlocked ? "blocked" : "unblocked";
+        return res
+            .status(200)
+            .json(
+                new ApiResponce(
+                    200,
+                    employee,
+                    `Employee ${status} successfully`,
+                ),
+            );
+    } catch (error) {
+        // Centralized error handling
+        const statusCode = error.statusCode || 500;
+        const message = error.message || "Internal server error";
+        return res
+            .status(statusCode)
+            .json(new ApiResponce(statusCode, null, message));
     }
-
-    if (!mongoose.Types.ObjectId.isValid(employeeId))
-        throw new ApiError(400, "Invalid Employee ID");
-
-    const employee = await Employee.findById(employeeId);
-    if (!employee) throw new ApiError(404, "Employee not found");
-
-    employee.isBlocked = !employee.isBlocked;
-    employee.blockReason = reason || "No reason provided";
-    await employee.save({ validateBeforeSave: false });
-
-    const status = employee.isBlocked ? "blocked" : "unblocked";
-    return res
-        .status(200)
-        .json(
-            new ApiResponce(200, employee, `Employee ${status} successfully`),
-        );
 });
 
 // Bulk Upload Employees
@@ -224,25 +273,38 @@ const toggleEmployeeStatus = asyncHandler(async (req, res) => {
 
 // Restore Deleted Accounts
 const restoreDeletedEmployee = asyncHandler(async (req, res) => {
-    const { employeeId } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(employeeId))
-        throw new ApiError(400, "Invalid Employee ID");
+    try {
+        const { employeeId } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(employeeId))
+            throw new ApiError(400, "Invalid Employee ID");
 
-    const employee = await Employee.findOne({ _id: employeeId, deleted: true });
-    if (!employee) throw new ApiError(404, "Employee not found or not deleted");
+        const employee = await Employee.findOne({
+            _id: employeeId,
+            deleted: true,
+        });
+        if (!employee)
+            throw new ApiError(404, "Employee not found or not deleted");
 
-    employee.deleted = false;
-    await employee.save();
+        employee.deleted = false;
+        await employee.save();
 
-    return res
-        .status(200)
-        .json(
-            new ApiResponce(
-                200,
-                employee,
-                "Employee account restored successfully",
-            ),
-        );
+        return res
+            .status(200)
+            .json(
+                new ApiResponce(
+                    200,
+                    employee,
+                    "Employee account restored successfully",
+                ),
+            );
+    } catch (error) {
+        // Centralized error handling
+        const statusCode = error.statusCode || 500;
+        const message = error.message || "Internal server error";
+        return res
+            .status(statusCode)
+            .json(new ApiResponce(statusCode, null, message));
+    }
 });
 
 export {

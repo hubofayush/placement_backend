@@ -152,7 +152,12 @@ const createEmployer = asyncHandler(async (req, res) => {
         // Abort the transaction and end the session in case of an error
         await session.abortTransaction();
         session.endSession();
-        throw new ApiError(500, `Registration Failed: ${error.message}`);
+        // Centralized error handling
+        const statusCode = error.statusCode || 500;
+        const message = error.message || "Internal server error";
+        return res
+            .status(statusCode)
+            .json(new ApiResponce(statusCode, null, message));
     }
 });
 
@@ -164,49 +169,58 @@ const createEmployer = asyncHandler(async (req, res) => {
  * _______________ Login Employer _______________
  */
 const loginEmployer = asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
+    try {
+        const { email, password } = req.body;
 
-    if (!email || !password) {
-        throw new ApiError(400, "Please provide email and password");
-    }
+        if (!email || !password) {
+            throw new ApiError(400, "Please provide email and password");
+        }
 
-    const employer = await Employer.findOne({ email });
+        const employer = await Employer.findOne({ email });
 
-    if (!employer) {
-        throw new ApiError(400, "Invalid email ");
-    }
+        if (!employer) {
+            throw new ApiError(400, "Invalid email ");
+        }
 
-    const isPasswordCorrect = await employer.isPasswordCorrect(password);
-    if (!isPasswordCorrect) {
-        throw new ApiError(400, "Invalid Password");
-    }
+        const isPasswordCorrect = await employer.isPasswordCorrect(password);
+        if (!isPasswordCorrect) {
+            throw new ApiError(400, "Invalid Password");
+        }
 
-    const { accessToken, refreshToken } = await generateToken(employer._id);
+        const { accessToken, refreshToken } = await generateToken(employer._id);
 
-    const employerData = await Employer.findById(employer._id).select(
-        "-password -refreshToken",
-    );
-
-    const options = {
-        httpOnly: true,
-        secure: true,
-    };
-
-    return res
-        .status(200)
-        .cookie("refreshTokenemp", refreshToken, options)
-        .cookie("accessTokenemp", accessToken, options)
-        .json(
-            new ApiResponce(
-                200,
-                {
-                    employer: employerData,
-                    accessToken,
-                    refreshToken,
-                },
-                "Login Successfully",
-            ),
+        const employerData = await Employer.findById(employer._id).select(
+            "-password -refreshToken",
         );
+
+        const options = {
+            httpOnly: true,
+            secure: true,
+        };
+
+        return res
+            .status(200)
+            .cookie("refreshTokenemp", refreshToken, options)
+            .cookie("accessTokenemp", accessToken, options)
+            .json(
+                new ApiResponce(
+                    200,
+                    {
+                        employer: employerData,
+                        accessToken,
+                        refreshToken,
+                    },
+                    "Login Successfully",
+                ),
+            );
+    } catch (error) {
+        // Centralized error handling
+        const statusCode = error.statusCode || 500;
+        const message = error.message || "Internal server error";
+        return res
+            .status(statusCode)
+            .json(new ApiResponce(statusCode, null, message));
+    }
 });
 /**
  * _______________END OF Login Employer _______________
@@ -215,28 +229,37 @@ const loginEmployer = asyncHandler(async (req, res) => {
  * _______________ LOG OUT EMPLOYER_______________
  */
 const logOutEmployer = asyncHandler(async (req, res) => {
-    await Employer.findByIdAndUpdate(
-        req.employer?._id,
-        {
-            $set: {
-                refreshToken: undefined,
+    try {
+        await Employer.findByIdAndUpdate(
+            req.employer?._id,
+            {
+                $set: {
+                    refreshToken: undefined,
+                },
             },
-        },
-        {
-            $new: true,
-        },
-    );
+            {
+                $new: true,
+            },
+        );
 
-    const options = {
-        secure: true,
-        httpOnly: true,
-    };
+        const options = {
+            secure: true,
+            httpOnly: true,
+        };
 
-    return res
-        .status(200)
-        .clearCookie("accessTokenemp", options)
-        .clearCookie("refreshTokenemp", options)
-        .json(new ApiResponce(200, {}, "Employer log out successfully"));
+        return res
+            .status(200)
+            .clearCookie("accessTokenemp", options)
+            .clearCookie("refreshTokenemp", options)
+            .json(new ApiResponce(200, {}, "Employer log out successfully"));
+    } catch (error) {
+        // Centralized error handling
+        const statusCode = error.statusCode || 500;
+        const message = error.message || "Internal server error";
+        return res
+            .status(statusCode)
+            .json(new ApiResponce(statusCode, null, message));
+    }
 });
 /**
  * _______________ END OF LOG OUT EMPLOYER_______________
@@ -246,70 +269,79 @@ const logOutEmployer = asyncHandler(async (req, res) => {
  * __________ VIEW EMPLOYEE PROFILE ______________
  */
 const viewProfile = asyncHandler(async (req, res) => {
-    const { empId } = req.params;
+    try {
+        const { empId } = req.params;
 
-    if (!empId) {
-        throw new ApiError(400, "Employee ID required");
-    }
+        if (!empId) {
+            throw new ApiError(400, "Employee ID required");
+        }
 
-    if (!mongoose.Types.ObjectId.isValid(empId)) {
-        throw new ApiError(400, "Wrong ID");
-    }
+        if (!mongoose.Types.ObjectId.isValid(empId)) {
+            throw new ApiError(400, "Wrong ID");
+        }
 
-    const employee = await Employee.aggregate([
-        {
-            $match: {
-                _id: new mongoose.Types.ObjectId(empId),
+        const employee = await Employee.aggregate([
+            {
+                $match: {
+                    _id: new mongoose.Types.ObjectId(empId),
+                },
             },
-        },
-        {
-            $lookup: {
-                from: "experiences",
-                localField: "_id",
-                foreignField: "employee",
-                as: "experience",
+            {
+                $lookup: {
+                    from: "experiences",
+                    localField: "_id",
+                    foreignField: "employee",
+                    as: "experience",
+                },
             },
-        },
-        {
-            $lookup: {
-                from: "locations",
-                localField: "location",
-                foreignField: "_id",
-                as: "currentLocation",
-                pipeline: [
-                    {
-                        $project: {
-                            state: 1,
-                            district: 1,
-                            subDistrict: 1,
-                            pincode: 1,
+            {
+                $lookup: {
+                    from: "locations",
+                    localField: "location",
+                    foreignField: "_id",
+                    as: "currentLocation",
+                    pipeline: [
+                        {
+                            $project: {
+                                state: 1,
+                                district: 1,
+                                subDistrict: 1,
+                                pincode: 1,
+                            },
                         },
-                    },
-                ],
+                    ],
+                },
             },
-        },
-        {
-            $project: {
-                fName: 1,
-                lName: 1,
-                phone: 1,
-                age: 1,
-                education: 1,
-                experience: 1,
-                gender: 1,
-                avatar: 1,
-                currentLocation: 1,
+            {
+                $project: {
+                    fName: 1,
+                    lName: 1,
+                    phone: 1,
+                    age: 1,
+                    education: 1,
+                    experience: 1,
+                    gender: 1,
+                    avatar: 1,
+                    currentLocation: 1,
+                },
             },
-        },
-    ]);
+        ]);
 
-    if (employee.length === 0) {
-        throw new ApiError(400, "Invalid ID, please try again");
+        if (employee.length === 0) {
+            throw new ApiError(400, "Invalid ID, please try again");
+        }
+
+        return res
+            .status(200)
+            .json(new ApiResponce(200, employee, "Employee Found"));
+    } catch (error) {
+        // Centralized error handling
+        const statusCode = error.statusCode || 500;
+        const message = error.message || "Internal server error";
+        return res
+            .status(statusCode)
+            .json(new ApiResponce(statusCode, null, message));
     }
-
-    return res
-        .status(200)
-        .json(new ApiResponce(200, employee, "Employee Found"));
 });
 /**
  * __________ END OF VIEW EMPLOYEE PROFILE ______________

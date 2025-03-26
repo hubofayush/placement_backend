@@ -7,48 +7,58 @@ import { asyncHandler } from "../../utils/asyncHandler.js";
 
 // Advanced Search for Records with Filters
 const advancedSearch = asyncHandler(async (req, res) => {
-    const { type, query, filters } = req.body; // type: 'employee', 'employer', 'application'
+    try {
+        const { type, query, filters } = req.body; // type: 'employee', 'employer', 'application'
 
-    let model;
-    switch (type) {
-        case "employee":
-            model = Employee;
-            break;
-        case "employer":
-            model = Employer;
-            break;
-        case "application":
-            model = JobApplication;
-            break;
-        default:
-            throw new ApiError(400, "Invalid search type");
+        let model;
+        switch (type) {
+            case "employee":
+                model = Employee;
+                break;
+            case "employer":
+                model = Employer;
+                break;
+            case "application":
+                model = JobApplication;
+                break;
+            default:
+                throw new ApiError(400, "Invalid search type");
+        }
+
+        const searchCriteria = {};
+
+        if (query) {
+            searchCriteria.$text = { $search: query };
+        }
+
+        if (filters) {
+            Object.entries(filters).forEach(([key, value]) => {
+                searchCriteria[key] = value;
+            });
+        }
+        console.log(searchCriteria);
+        const results = await model.find(searchCriteria).select("-password");
+
+        if (!results.length)
+            throw new ApiError(404, "No matching records found");
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponce(
+                    200,
+                    results,
+                    "Search results fetched successfully",
+                ),
+            );
+    } catch (error) {
+        // Centralized error handling
+        const statusCode = error.statusCode || 500;
+        const message = error.message || "Internal server error";
+        return res
+            .status(statusCode)
+            .json(new ApiResponce(statusCode, null, message));
     }
-
-    const searchCriteria = {};
-
-    if (query) {
-        searchCriteria.$text = { $search: query };
-    }
-
-    if (filters) {
-        Object.entries(filters).forEach(([key, value]) => {
-            searchCriteria[key] = value;
-        });
-    }
-    console.log(searchCriteria);
-    const results = await model.find(searchCriteria).select("-password");
-
-    if (!results.length) throw new ApiError(404, "No matching records found");
-
-    return res
-        .status(200)
-        .json(
-            new ApiResponce(
-                200,
-                results,
-                "Search results fetched successfully",
-            ),
-        );
 });
 
 export { advancedSearch };

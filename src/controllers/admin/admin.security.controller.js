@@ -155,30 +155,48 @@ import { blockedIPs } from "../../constant.js";
 
 // block ip
 const blockIP = asyncHandler(async (req, res) => {
-    const { ipAddress } = req.body;
-    if (!ipAddress) throw new ApiError(400, "IP address is required");
+    try {
+        const { ipAddress } = req.body;
+        if (!ipAddress) throw new ApiError(400, "IP address is required");
 
-    blockedIPs.add(ipAddress);
-    console.log(blockedIPs);
-    return res
-        .status(200)
-        .json(new ApiResponce(200, {}, "IP blocked successfully"));
+        blockedIPs.add(ipAddress);
+        console.log(blockedIPs);
+        return res
+            .status(200)
+            .json(new ApiResponce(200, {}, "IP blocked successfully"));
+    } catch (error) {
+        // Centralized error handling
+        const statusCode = error.statusCode || 500;
+        const message = error.message || "Internal server error";
+        return res
+            .status(statusCode)
+            .json(new ApiResponce(statusCode, null, message));
+    }
 });
 
 // IP Unblocking
 const unblockIP = asyncHandler(async (req, res) => {
-    const { ipAddress } = req.body;
+    try {
+        const { ipAddress } = req.body;
 
-    if (!ipAddress) throw new ApiError(400, "IP address is required");
-    console.log(blockedIPs);
+        if (!ipAddress) throw new ApiError(400, "IP address is required");
+        console.log(blockedIPs);
 
-    if (!blockedIPs.has(ipAddress))
-        throw new ApiError(404, "IP address not found in blocked list");
+        if (!blockedIPs.has(ipAddress))
+            throw new ApiError(404, "IP address not found in blocked list");
 
-    blockedIPs.delete(ipAddress);
-    return res
-        .status(200)
-        .json(new ApiResponce(200, {}, "IP unblocked successfully"));
+        blockedIPs.delete(ipAddress);
+        return res
+            .status(200)
+            .json(new ApiResponce(200, {}, "IP unblocked successfully"));
+    } catch (error) {
+        // Centralized error handling
+        const statusCode = error.statusCode || 500;
+        const message = error.message || "Internal server error";
+        return res
+            .status(statusCode)
+            .json(new ApiResponce(statusCode, null, message));
+    }
 });
 
 export {

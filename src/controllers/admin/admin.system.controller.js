@@ -6,54 +6,85 @@ import { exec } from "child_process";
 import os from "os";
 // Database Backup
 const databaseBackup = asyncHandler(async (req, res) => {
-    exec(
-        `mongodump --uri=${process.env.MONGO_URL}${DB_NAME} --out=./backup`,
-        (error, stdout, stderr) => {
-            if (error) {
-                console.error(`Backup Error: ${stderr}`);
-                throw new ApiError(500, `Database backup failed:${error}`);
-            }
-            return res
-                .status(200)
-                .json(new ApiResponce(200, {}, "Database backup successful"));
-        },
-    );
+    try {
+        exec(
+            `mongodump --uri=${process.env.MONGO_URL}${DB_NAME} --out=./backup`,
+            (error, stdout, stderr) => {
+                if (error) {
+                    console.error(`Backup Error: ${stderr}`);
+                    throw new ApiError(500, `Database backup failed:${error}`);
+                }
+                return res
+                    .status(200)
+                    .json(
+                        new ApiResponce(200, {}, "Database backup successful"),
+                    );
+            },
+        );
+    } catch (error) {
+        // Centralized error handling
+        const statusCode = error.statusCode || 500;
+        const message = error.message || "Internal server error";
+        return res
+            .status(statusCode)
+            .json(new ApiResponce(statusCode, null, message));
+    }
 });
 
 // Database Restore
 const databaseRestore = asyncHandler(async (req, res) => {
-    exec(
-        "mongorestore --uri='your_mongodb_connection_uri' ./backup",
-        (error, stdout, stderr) => {
-            if (error)
+    try {
+        exec(
+            "mongorestore --uri='your_mongodb_connection_uri' ./backup",
+            (error, stdout, stderr) => {
+                if (error)
+                    return res
+                        .status(500)
+                        .json(new ApiError(500, "Database restore failed"));
                 return res
-                    .status(500)
-                    .json(new ApiError(500, "Database restore failed"));
-            return res
-                .status(200)
-                .json(new ApiResponce(200, {}, "Database restore successful"));
-        },
-    );
+                    .status(200)
+                    .json(
+                        new ApiResponce(200, {}, "Database restore successful"),
+                    );
+            },
+        );
+    } catch (error) {
+        // Centralized error handling
+        const statusCode = error.statusCode || 500;
+        const message = error.message || "Internal server error";
+        return res
+            .status(statusCode)
+            .json(new ApiResponce(statusCode, null, message));
+    }
 });
 
 // Server Health Monitoring
 const getServerHealth = asyncHandler(async (req, res) => {
-    const healthData = {
-        uptime: os.uptime(),
-        freeMemory: os.freemem(),
-        totalMemory: os.totalmem(),
-        cpuLoad: os.loadavg(),
-    };
+    try {
+        const healthData = {
+            uptime: os.uptime(),
+            freeMemory: os.freemem(),
+            totalMemory: os.totalmem(),
+            cpuLoad: os.loadavg(),
+        };
 
-    return res
-        .status(200)
-        .json(
-            new ApiResponce(
-                200,
-                healthData,
-                "Server health data fetched successfully",
-            ),
-        );
+        return res
+            .status(200)
+            .json(
+                new ApiResponce(
+                    200,
+                    healthData,
+                    "Server health data fetched successfully",
+                ),
+            );
+    } catch (error) {
+        // Centralized error handling
+        const statusCode = error.statusCode || 500;
+        const message = error.message || "Internal server error";
+        return res
+            .status(statusCode)
+            .json(new ApiResponce(statusCode, null, message));
+    }
 });
 
 export { databaseBackup, databaseRestore, getServerHealth };

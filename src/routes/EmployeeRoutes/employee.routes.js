@@ -17,6 +17,7 @@ import {
 const router = Router();
 import { verifyJWT } from "../../middlewares/auth.middleware.js";
 import {
+    deletedApplication,
     getAllApplications,
     postApplication,
     updateApplicationBid,
@@ -56,7 +57,8 @@ router
 
 router
     .route("/job/application/update/:applicationId")
-    .patch(verifyJWT, updateApplicationBid);
+    .patch(verifyJWT, uploadPDF.single("pdfFile"), updateApplicationBid)
+    .delete(verifyJWT, deletedApplication);
 
 router
     .route("/job/:jobId")
