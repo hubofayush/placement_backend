@@ -849,7 +849,6 @@ const getAllCompanies = asyncHandler(async (req, res) => {
 const viewNotifications = asyncHandler(async (req, res) => {
     const notifications = await EmployeeNotification.find({
         employee: req.employee._id,
-        read: false,
     });
     if (!notifications) {
         throw new ApiError(400, "no Notificatins");
