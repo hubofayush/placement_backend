@@ -651,51 +651,138 @@ const updateEmployee = asyncHandler(async (req, res) => {
 /**
  * _____________ Delete Employee ___________
  */
+// const deleteEmployee = asyncHandler(async (req, res) => {
+//     try {
+//         // find subsciprion and delete
+//         const subscriptionData = await EmployeeSubscription.findByIdAndDelete(
+//             req.employee?.subscription,
+//         );
+//         if (!subscriptionData) {
+//             throw new ApiError(401, "subscription not found or not deleted");
+//         }
+
+//         const locationData = await Location.findByIdAndDelete(
+//             req.employee?.location,
+//         );
+//         if (!locationData) {
+//             throw new ApiError(401, "user Location not found or not deleted");
+//         }
+
+//         const experirceData = await Experience.findByIdAndDelete(
+//             req.employee?.workExperience,
+//         );
+//         if (!experirceData) {
+//             throw new ApiError(401, "experience not found or not deleted");
+//         }
+
+//         let endapplication = false;
+//         if (!endapplication) {
+//             let applicationFound = await Application.findOneAndDelete({
+//                 employee: req.employee._id,
+//             });
+
+//             if (!applicationFound) {
+//                 endapplication = true;
+//             }
+//         }
+
+//         const deletedEmployee = await Employee.findByIdAndDelete(
+//             req.employee._id,
+//         );
+//         if (!deletedEmployee) {
+//             throw new ApiError(404, "Employee not deleted");
+//         }
+
+//         return res
+//             .status(200)
+//             .json(new ApiResponce(200, null, "Employee deleted successfully"));
+//     } catch (error) {
+//         const statusCode = error.statusCode || 500;
+//         const message = error.message || "Internal server error";
+//         return res
+//             .status(statusCode)
+//             .json(new ApiResponce(statusCode, null, message));
+//     }
+// });
 const deleteEmployee = asyncHandler(async (req, res) => {
     try {
-        // find subsciprion and delete
-        const subscriptionData = await EmployeeSubscription.findByIdAndDelete(
-            req.employee?.subscription,
-        );
-        if (!subscriptionData) {
-            throw new ApiError(401, "subscription not found or not deleted");
+        // 1. Validate employee data from request
+        if (!req.employee || !req.employee._id) {
+            throw new ApiError(401, "Unauthorized: Employee not authenticated");
+        }
+        const employeeId = req.employee._id;
+
+        // 2. Check if employee exists
+        const employee = await Employee.findById(employeeId).exec();
+        if (!employee) {
+            throw new ApiError(404, "Employee not found");
         }
 
-        const locationData = await Location.findByIdAndDelete(
-            req.employee?.location,
-        );
-        if (!locationData) {
-            throw new ApiError(401, "user Location not found or not deleted");
+        // 3. Delete related data concurrently (if they exist)
+        const [
+            subscriptionDeleted,
+            locationDeleted,
+            experienceDeleted,
+            applicationsDeleted,
+        ] = await Promise.all([
+            req.employee.subscription
+                ? EmployeeSubscription.findByIdAndDelete(
+                      req.employee.subscription,
+                  ).exec()
+                : null,
+            req.employee.location
+                ? Location.findByIdAndDelete(req.employee.location).exec()
+                : null,
+            req.employee.workExperience
+                ? Experience.findByIdAndDelete(
+                      req.employee.workExperience,
+                  ).exec()
+                : null,
+            Application.deleteMany({ employee: employeeId }).exec(),
+        ]);
+
+        // Optional: Log warnings if related data wasn’t deleted (but don’t fail the request)
+        if (req.employee.subscription && !subscriptionDeleted) {
+            console.warn(
+                `Subscription ${req.employee.subscription} not found for employee ${employeeId}`,
+            );
+        }
+        if (req.employee.location && !locationDeleted) {
+            console.warn(
+                `Location ${req.employee.location} not found for employee ${employeeId}`,
+            );
+        }
+        if (req.employee.workExperience && !experienceDeleted) {
+            console.warn(
+                `Experience ${req.employee.workExperience} not found for employee ${employeeId}`,
+            );
         }
 
-        const experirceData = await Experience.findByIdAndDelete(
-            req.employee?.workExperience,
-        );
-        if (!experirceData) {
-            throw new ApiError(401, "experience not found or not deleted");
-        }
-
-        let endapplication = false;
-        if (!endapplication) {
-            let applicationFound = await Application.findOneAndDelete({
-                employee: req.employee._id,
-            });
-
-            if (!applicationFound) {
-                endapplication = true;
-            }
-        }
-
-        const deletedEmployee = await Employee.findByIdAndDelete(
-            req.employee._id,
-        );
+        // 4. Delete the employee
+        const deletedEmployee =
+            await Employee.findByIdAndDelete(employeeId).exec();
         if (!deletedEmployee) {
-            throw new ApiError(404, "Employee not deleted");
+            throw new ApiError(
+                500,
+                "Failed to delete employee, please try again",
+            );
         }
 
+        // 5. Log success (replace with a proper logger in production)
+        console.log(
+            `Employee ${employeeId} deleted successfully; Applications deleted: ${applicationsDeleted.deletedCount}`,
+        );
+
+        // 6. Send success response
         return res
             .status(200)
-            .json(new ApiResponce(200, null, "Employee deleted successfully"));
+            .json(
+                new ApiResponce(
+                    200,
+                    null,
+                    "Employee and related data deleted successfully",
+                ),
+            );
     } catch (error) {
         const statusCode = error.statusCode || 500;
         const message = error.message || "Internal server error";
