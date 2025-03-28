@@ -120,27 +120,111 @@ const getMyApplications = asyncHandler(async (req, res) => {
 // end of get my applications //
 
 // delete job applicaton //
+// const deleteJobApplication = asyncHandler(async (req, res) => {
+//     try {
+//         const jobApplicationId = req.params.id;
+
+//         if (!mongoose.Types.ObjectId.isValid(jobApplicationId)) {
+//             throw new ApiError(400, "Invalid job application id");
+//         }
+
+//         let applicationDeletedAll = false;
+//         if (!applicationDeletedAll) {
+//             const applicationDeleted = await Application.find({
+//                 jobApplication: jobApplicationId,
+//             });
+//             if (!applicationDeleted) {
+//                 applicationDeletedAll = true;
+//             }
+//         }
+//         let shortListedApplicationDeletedAll = false;
+//         if (!shortListedApplicationDeletedAll) {
+//             const shortListedApplicationDeleted =
+//                 await ShortlistedApplication.find({
+//                     jobApplication: jobApplicationId,
+//                 });
+//             if (!shortListedApplicationDeleted) {
+//                 shortListedApplicationDeletedAll = true;
+//             }
+//         }
+
+//         const jobApplication =
+//             await JobApplication.findByIdAndDelete(jobApplicationId);
+
+//         if (!jobApplication) {
+//             throw new ApiError(400, "No job application found");
+//         }
+//         return res
+//             .status(200)
+//             .json(
+//                 new ApiResponce(
+//                     200,
+//                     {},
+//                     "Job application deleted successfully",
+//                 ),
+//             );
+//     } catch (error) {
+//         // Centralized error handling
+//         const statusCode = error.statusCode || 500;
+//         const message = error.message || "Internal server error";
+//         return res
+//             .status(statusCode)
+//             .json(new ApiResponce(statusCode, null, message));
+//     }
+// });
 const deleteJobApplication = asyncHandler(async (req, res) => {
     try {
-        const jobApplicationId = req.params.id;
+        // 1. Extract and validate jobApplicationId from params
+        const { id: jobApplicationId } = req.params;
+        if (!jobApplicationId) {
+            throw new ApiError(400, "Job application ID is required");
+        }
 
         if (!mongoose.Types.ObjectId.isValid(jobApplicationId)) {
-            throw new ApiError(400, "Invalid job application id");
+            throw new ApiError(400, "Invalid job application ID format");
         }
 
+        // 2. Check if the job application exists
         const jobApplication =
-            await JobApplication.findByIdAndDelete(jobApplicationId);
-
+            await JobApplication.findById(jobApplicationId).exec();
         if (!jobApplication) {
-            throw new ApiError(400, "No job application found");
+            throw new ApiError(404, "Job application not found");
         }
+
+        // 3. Delete related applications and shortlisted applications
+        const [relatedApplications, shortlistedApplications] =
+            await Promise.all([
+                Application.deleteMany({
+                    jobApplication: jobApplicationId,
+                }).exec(),
+                ShortlistedApplication.deleteMany({
+                    jobApplication: jobApplicationId,
+                }).exec(),
+            ]);
+
+        // 4. Delete the job application
+        const deletedJobApplication =
+            await JobApplication.findByIdAndDelete(jobApplicationId).exec();
+        if (!deletedJobApplication) {
+            throw new ApiError(
+                500,
+                "Failed to delete job application, please try again",
+            );
+        }
+
+        // 5. Log success (replace with a proper logger in production)
+        console.log(
+            `Job application ${jobApplicationId} deleted with ${relatedApplications.deletedCount} applications and ${shortlistedApplications.deletedCount} shortlisted applications`,
+        );
+
+        // 6. Send success response
         return res
             .status(200)
             .json(
                 new ApiResponce(
                     200,
-                    {},
-                    "Job application deleted successfully",
+                    null,
+                    "Job application and related data deleted successfully",
                 ),
             );
     } catch (error) {
