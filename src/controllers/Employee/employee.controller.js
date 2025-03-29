@@ -827,10 +827,8 @@ const getCurrentUser = asyncHandler(async (req, res) => {
  */
 const search = asyncHandler(async (req, res) => {
     try {
-        const { q, limit = 10, page = 1, sortBy, sortType } = req.query;
+        const { q, sortBy, sortType } = req.query;
 
-        const parseLimit = parseInt(limit);
-        const pageSkip = (page - 1) * parseLimit;
         const sortStage = {};
         sortStage[sortBy] = sortType === "asc" ? 1 : -1;
         console.log(sortStage);
@@ -888,12 +886,6 @@ const search = asyncHandler(async (req, res) => {
                 },
             },
             {
-                $limit: parseLimit,
-            },
-            {
-                $skip: pageSkip,
-            },
-            {
                 $sort: sortStage,
             },
         ]);
@@ -949,12 +941,6 @@ const search = asyncHandler(async (req, res) => {
                     companyName: 1,
                     closeDate: 1,
                 },
-            },
-            {
-                $limit: parseLimit,
-            },
-            {
-                $skip: pageSkip,
             },
             {
                 $sort: sortStage,
