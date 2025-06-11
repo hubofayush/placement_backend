@@ -310,166 +310,166 @@ const Register = asyncHandler(async (req, res) => {
  *   ________ Log in Employee __________________
  **/
 
-// const loginEmployee = asyncHandler(async (req, res) => {
-//     try {
-//         // 1. getting data from req
-//         // 2. validating username or email
-//         // 3. finding user
-//         // 4. password check
-//         // 5. access and refresh token function
-//         // 6. send coockie
+const loginEmployee = asyncHandler(async (req, res) => {
+    try {
+        // 1. getting data from req
+        // 2. validating username or email
+        // 3. finding user
+        // 4. password check
+        // 5. access and refresh token function
+        // 6. send coockie
 
-//         // getting input //
-//         const { phone, password } = req.body;
-//         // end of getting input //
+        // getting input //
+        const { phone, password } = req.body;
+        // end of getting input //
 
-//         // validating input //
-//         if (!phone || !password) {
-//             throw new ApiError(400, "phone or password required");
-//         }
-//         // end of validating input //
+        // validating input //
+        if (!phone || !password) {
+            throw new ApiError(400, "phone or password required");
+        }
+        // end of validating input //
 
-//         // finding employee by phone number //
-//         const findEmployee = await Employee.findOne({
-//             phone,
-//         });
-//         // end of finding employee by phone number //
+        // finding employee by phone number //
+        const findEmployee = await Employee.findOne({
+            phone,
+        });
+        // end of finding employee by phone number //
 
-//         // throw error on error //
-//         if (!findEmployee) {
-//             throw new ApiError(404, "user not found");
-//         }
-//         // throw error on error //
+        // throw error on error //
+        if (!findEmployee) {
+            throw new ApiError(404, "user not found");
+        }
+        // throw error on error //
 
-//         // checking passoword is correct or not //
-//         const isPasswordValid = await findEmployee.isPasswordCorrect(password);
-//         if (!isPasswordValid) {
-//             throw new ApiError(401, "invalid password");
-//             // res.send(new ApiResponce(400, [], "invalid Password"));
-//         }
-//         // end of checking passoword is correct or not //
+        // checking passoword is correct or not //
+        const isPasswordValid = await findEmployee.isPasswordCorrect(password);
+        if (!isPasswordValid) {
+            throw new ApiError(401, "invalid password");
+            // res.send(new ApiResponce(400, [], "invalid Password"));
+        }
+        // end of checking passoword is correct or not //
 
-//         // generating tolens by id //
-//         const { accessToken, refreshToken } = await generateToken(
-//             findEmployee._id,
-//         );
-//         // end of generating tolens by id //
+        // generating tolens by id //
+        const { accessToken, refreshToken } = await generateToken(
+            findEmployee._id,
+        );
+        // end of generating tolens by id //
 
-//         // getting new employee with refresh token //
-//         // const employeeReturn = await Employee.findById(findEmployee._id).select(
-//         //     "-password -refreshToken",
-//         // );
-//         const employeeReturn = await Employee.aggregate([
-//             {
-//                 $match: {
-//                     _id: findEmployee?._id,
-//                 },
-//             },
-//             {
-//                 $lookup: {
-//                     from: "locations",
-//                     localField: "location",
-//                     foreignField: "_id",
-//                     as: "locations",
-//                     pipeline: [
-//                         {
-//                             $project: {
-//                                 state: 1,
-//                                 district: 1,
-//                                 subDistrict: 1,
-//                                 pincode: 1,
-//                             },
-//                         },
-//                     ],
-//                 },
-//             },
-//             {
-//                 $lookup: {
-//                     from: "experiences",
-//                     localField: "workExperience",
-//                     foreignField: "_id",
-//                     as: "experiences",
-//                     pipeline: [
-//                         {
-//                             $project: {
-//                                 yearOfExperience: 1,
-//                                 working: 1,
-//                                 salary: 1,
-//                                 jobRole: 1,
-//                             },
-//                         },
-//                     ],
-//                 },
-//             },
-//             {
-//                 $lookup: {
-//                     from: "employeeSubscriptions",
-//                     localField: "subscription",
-//                     foreignField: "_id",
-//                     as: "sunscriptions",
-//                 },
-//             },
-//             {
-//                 $project: {
-//                     _id: 1,
-//                     fName: 1,
-//                     lName: 1,
-//                     phone: 1,
-//                     age: 1,
-//                     dateOfBirth: 1,
-//                     gender: 1,
-//                     email: 1,
-//                     avatar: 1,
-//                     leades: 1,
-//                     education: 1,
-//                     locations: 1,
-//                     experiences: 1,
-//                     subscriptions: 1,
-//                     currentLocation: 1,
-//                     district: 1,
-//                     division: 1,
-//                     experienceYears: 1,
-//                     working: 1,
-//                     tred: 1,
-//                 },
-//             },
-//         ]);
-//         // getting new employee with refresh token //
+        // getting new employee with refresh token //
+        // const employeeReturn = await Employee.findById(findEmployee._id).select(
+        //     "-password -refreshToken",
+        // );
+        const employeeReturn = await Employee.aggregate([
+            {
+                $match: {
+                    _id: findEmployee?._id,
+                },
+            },
+            {
+                $lookup: {
+                    from: "locations",
+                    localField: "location",
+                    foreignField: "_id",
+                    as: "locations",
+                    pipeline: [
+                        {
+                            $project: {
+                                state: 1,
+                                district: 1,
+                                subDistrict: 1,
+                                pincode: 1,
+                            },
+                        },
+                    ],
+                },
+            },
+            {
+                $lookup: {
+                    from: "experiences",
+                    localField: "workExperience",
+                    foreignField: "_id",
+                    as: "experiences",
+                    pipeline: [
+                        {
+                            $project: {
+                                yearOfExperience: 1,
+                                working: 1,
+                                salary: 1,
+                                jobRole: 1,
+                            },
+                        },
+                    ],
+                },
+            },
+            {
+                $lookup: {
+                    from: "employeeSubscriptions",
+                    localField: "subscription",
+                    foreignField: "_id",
+                    as: "sunscriptions",
+                },
+            },
+            {
+                $project: {
+                    _id: 1,
+                    fName: 1,
+                    lName: 1,
+                    phone: 1,
+                    age: 1,
+                    dateOfBirth: 1,
+                    gender: 1,
+                    email: 1,
+                    avatar: 1,
+                    leades: 1,
+                    education: 1,
+                    locations: 1,
+                    experiences: 1,
+                    subscriptions: 1,
+                    currentLocation: 1,
+                    district: 1,
+                    division: 1,
+                    experienceYears: 1,
+                    working: 1,
+                    tred: 1,
+                },
+            },
+        ]);
+        // getting new employee with refresh token //
 
-//         // setting options for cookies //
-//         const options = {
-//             httpOnly: true,
-//             secure: true,
-//         };
-//         // end of setting options for cookies //
-//         console.log("employee");
-//         // logger.info(`Login attempt from IP: ${req.ip} with phone: ${phone}`);
-//         // sending responce  //
-//         return res
-//             .status(200)
-//             .cookie("accessToken", accessToken, options)
-//             .cookie("refreshToken", refreshToken, options)
-//             .json(
-//                 new ApiResponce(
-//                     200,
-//                     {
-//                         employee: employeeReturn,
-//                         accessToken,
-//                         refreshToken,
-//                     },
-//                     "employee found",
-//                 ),
-//             );
-//     } catch (error) {
-//         // Centralized error handling
-//         const statusCode = error.statusCode || 500;
-//         const message = error.message || "Internal server error";
-//         return res
-//             .status(statusCode)
-//             .json(new ApiResponce(statusCode, null, message));
-//     }
-//     // end of sending responce  //
-// });
+        // setting options for cookies //
+        const options = {
+            httpOnly: true,
+            secure: true,
+        };
+        // end of setting options for cookies //
+        console.log("employee");
+        // logger.info(`Login attempt from IP: ${req.ip} with phone: ${phone}`);
+        // sending responce  //
+        return res
+            .status(200)
+            .cookie("accessToken", accessToken, options)
+            .cookie("refreshToken", refreshToken, options)
+            .json(
+                new ApiResponce(
+                    200,
+                    {
+                        employee: employeeReturn,
+                        accessToken,
+                        refreshToken,
+                    },
+                    "employee found",
+                ),
+            );
+    } catch (error) {
+        // Centralized error handling
+        const statusCode = error.statusCode || 500;
+        const message = error.message || "Internal server error";
+        return res
+            .status(statusCode)
+            .json(new ApiResponce(statusCode, null, message));
+    }
+    // end of sending responce  //
+});
 /**
  *  __________END OF LOGIN EMPLOYEE_____________
  **/
