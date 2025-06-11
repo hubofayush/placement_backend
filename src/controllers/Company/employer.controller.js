@@ -54,42 +54,138 @@ const generateToken = async (id) => {
  * @returns {Object} - Returns a success response with the newly created employer details.
  */
 
+/**
+ * Old Create Employee code
+ */
+// const createEmployer = asyncHandler(async (req, res) => {
+//     // Destructure the required fields from the request body
+//     const {
+//         name,
+//         authorityName,
+//         password,
+//         email,
+//         location,
+//         subscription,
+//         logo,
+//     } = req.body;
+
+//     // Check if any required fields are missing and throw an error if so
+//     if (!name || !authorityName || !password || !email || !location) {
+//         throw new ApiError(400, "all feilds are required");
+//     }
+
+//     // Check if an employer with the same email already exists
+//     const oldEmployer = await Employer.findOne({ email });
+//     if (oldEmployer) {
+//         throw new ApiError(400, "email Already registered");
+//     }
+
+//     // upload logo on cloudinary //
+//     const logoFile = req.file?.path;
+
+//     const logoLocalPath = logoFile;
+//     if (!logoLocalPath) {
+//         throw new ApiError(400, "logo required");
+//     }
+
+//     const logoImage = await uploadOnCloudinary(logoLocalPath);
+//     if (!logoImage) {
+//         throw new ApiError(400, "Logo failed upload on cloudinary");
+//     }
+//     // end of upload logo on cloudinary //
+
+//     // Start a new MongoDB session and transaction
+//     const session = await mongoose.startSession();
+//     session.startTransaction();
+
+//     try {
+//         // Create a new employer document
+//         const newEmployer = await Employer.create(
+//             [
+//                 {
+//                     name: name,
+//                     authorityName: authorityName,
+//                     location: location,
+//                     password: password,
+//                     email: email,
+//                     logo: logoImage?.url,
+//                 },
+//             ],
+//             { session },
+//         );
+
+//         // Get the ID of the newly created employer
+//         const empId = newEmployer[0]._id;
+
+//         if (!subscription) {
+//             throw new ApiError(400, "subscription is required");
+//         }
+
+//         // Prepare the subscription data
+//         const subscriptionData = {
+//             employer: empId,
+//             subscriptionType: subscription,
+//         };
+
+//         // Insert the subscription data into the EmployerSubscription collection
+//         const [subscriptionRecords] = await Promise.all([
+//             EmployerSubscription.insertMany(subscriptionData, { session }),
+//         ]);
+
+//         // Associate the subscription records with the new employer
+//         newEmployer[0].subscription = subscriptionRecords.map((sub) => sub._id);
+//         await newEmployer[0].save({ session });
+
+//         console.log(newEmployer[0]);
+//         // Commit the transaction and end the session
+//         await session.commitTransaction();
+//         session.endSession();
+
+//         // Send a success response to the client
+//         return res
+//             .status(200)
+//             .json(
+//                 new ApiResponce(
+//                     200,
+//                     newEmployer,
+//                     "Employee Register Successfully",
+//                 ),
+//             );
+//     } catch (error) {
+//         // Abort the transaction and end the session in case of an error
+//         await session.abortTransaction();
+//         session.endSession();
+//         // Centralized error handling
+//         const statusCode = error.statusCode || 500;
+//         const message = error.message || "Internal server error";
+//         return res
+//             .status(statusCode)
+//             .json(new ApiResponce(statusCode, null, message));
+//     }
+// });
+
+/**
+ * OLD CREATE EMPLOYEE CODE
+ */
+
+/**
+ * New code as per website
+ */
 const createEmployer = asyncHandler(async (req, res) => {
     // Destructure the required fields from the request body
-    const {
-        name,
-        authorityName,
-        password,
-        email,
-        location,
-        subscription,
-        logo,
-    } = req.body;
+    const { name, authorityName, password, email, location, subscription } =
+        req.body;
 
     // Check if any required fields are missing and throw an error if so
     if (!name || !authorityName || !password || !email || !location) {
-        throw new ApiError(400, "all feilds are required");
+        throw new ApiError(400, "All fields are required");
     }
 
     // Check if an employer with the same email already exists
     const oldEmployer = await Employer.findOne({ email });
     if (oldEmployer) {
-        throw new ApiError(400, "email Already registered");
+        throw new ApiError(400, "Email already registered");
     }
-
-    // upload logo on cloudinary //
-    const logoFile = req.file?.path;
-
-    const logoLocalPath = logoFile;
-    if (!logoLocalPath) {
-        throw new ApiError(400, "logo required");
-    }
-
-    const logoImage = await uploadOnCloudinary(logoLocalPath);
-    if (!logoImage) {
-        throw new ApiError(400, "Logo failed upload on cloudinary");
-    }
-    // end of upload logo on cloudinary //
 
     // Start a new MongoDB session and transaction
     const session = await mongoose.startSession();
@@ -105,7 +201,6 @@ const createEmployer = asyncHandler(async (req, res) => {
                     location: location,
                     password: password,
                     email: email,
-                    logo: logoImage?.url,
                 },
             ],
             { session },
@@ -115,7 +210,7 @@ const createEmployer = asyncHandler(async (req, res) => {
         const empId = newEmployer[0]._id;
 
         if (!subscription) {
-            throw new ApiError(400, "subscription is required");
+            throw new ApiError(400, "Subscription is required");
         }
 
         // Prepare the subscription data
@@ -133,7 +228,6 @@ const createEmployer = asyncHandler(async (req, res) => {
         newEmployer[0].subscription = subscriptionRecords.map((sub) => sub._id);
         await newEmployer[0].save({ session });
 
-        console.log(newEmployer[0]);
         // Commit the transaction and end the session
         await session.commitTransaction();
         session.endSession();
@@ -145,22 +239,19 @@ const createEmployer = asyncHandler(async (req, res) => {
                 new ApiResponce(
                     200,
                     newEmployer,
-                    "Employee Register Successfully",
+                    "Employer registered successfully",
                 ),
             );
     } catch (error) {
         // Abort the transaction and end the session in case of an error
         await session.abortTransaction();
         session.endSession();
-        // Centralized error handling
-        const statusCode = error.statusCode || 500;
-        const message = error.message || "Internal server error";
-        return res
-            .status(statusCode)
-            .json(new ApiResponce(statusCode, null, message));
+        throw new ApiError(500, `Registration failed: ${error.message}`);
     }
 });
-
+/**
+ * New code as per website
+ */
 /**
  * ________________ END OF Register Employer _____________
  */
