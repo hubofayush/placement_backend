@@ -3,12 +3,19 @@ import { ApiError } from "../../utils/ApiError.js";
 import { ApiResponce } from "../../utils/ApiResponce.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { exec } from "child_process";
+import { execFile } from "child_process";
 import os from "os";
 // Database Backup
 const databaseBackup = asyncHandler(async (req, res) => {
     try {
-        exec(
-            `mongodump --uri=${process.env.MONGO_URL}${DB_NAME} --out=./backup`,
+        execFile(
+            "mongodump",
+            [
+                "--uri",
+                `${process.env.MONGO_URL}${DB_NAME}`,
+                "--out",
+                "./backup",
+            ],
             (error, stdout, stderr) => {
                 if (error) {
                     console.error(`Backup Error: ${stderr}`);
@@ -35,7 +42,7 @@ const databaseBackup = asyncHandler(async (req, res) => {
 const databaseRestore = asyncHandler(async (req, res) => {
     try {
         exec(
-            "mongorestore --uri='your_mongodb_connection_uri' ./backup",
+            `mongorestore --uri=${process.env.MONGO_URL}${DB_NAME} ./backup/${DB_NAME}`,
             (error, stdout, stderr) => {
                 if (error)
                     return res

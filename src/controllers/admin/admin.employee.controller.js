@@ -22,6 +22,8 @@ const getAllEmployees = asyncHandler(async (req, res) => {
             .limit(Number(limit))
             .select("-password");
 
+        const totalCount = await Employee.countDocuments();
+
         if (!employees.length) throw new ApiError(404, "No employees found");
 
         return res
@@ -29,7 +31,7 @@ const getAllEmployees = asyncHandler(async (req, res) => {
             .json(
                 new ApiResponce(
                     200,
-                    { employees, totalEmployees: employees.length },
+                    { employees, totalEmployees: totalCount },
                     "Employees fetched successfully",
                 ),
             );
@@ -44,6 +46,11 @@ const getAllEmployees = asyncHandler(async (req, res) => {
 });
 
 // get blocked employees
+
+/**
+     This function duplicates most of the logic from getAllEmployees with only a filter difference. Additionally, it has the same incorrect totalEmployees calculation issue.
+Consider creating a shared helper function:
+ */
 const getBlockedEmployees = asyncHandler(async (req, res) => {
     try {
         const {
@@ -164,7 +171,6 @@ const viewAdminSingleEmployee = asyncHandler(async (req, res) => {
                     currentLocation: 1,
                     dateOfBirth: 1,
                     leades: 1,
-                    refreshToken: 1,
                     isBlocked: 1,
                     blockReason: 1,
                     subscription: 1,
@@ -191,6 +197,9 @@ const viewAdminSingleEmployee = asyncHandler(async (req, res) => {
 });
 
 // Delete an employee
+/**
+ * The function performs a hard delete while the codebase has a restoreDeletedEmployee function that expects a soft delete pattern with a deleted flag. This inconsistency could lead to permanent data loss.
+ */
 const deleteEmployee = asyncHandler(async (req, res) => {
     try {
         const { employeeId } = req.params;
@@ -230,7 +239,10 @@ const toggleEmployeeStatus = asyncHandler(async (req, res) => {
         if (!employee) throw new ApiError(404, "Employee not found");
 
         employee.isBlocked = !employee.isBlocked;
-        employee.blockReason = reason || "No reason provided";
+        // employee.blockReason = reason || "No reason provided";
+        employee.blockReason = employee.isBlocked
+            ? reason || "No reason provided"
+            : null;
         await employee.save({ validateBeforeSave: false });
 
         const status = employee.isBlocked ? "blocked" : "unblocked";

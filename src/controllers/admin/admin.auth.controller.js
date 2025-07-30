@@ -28,7 +28,7 @@ const generateToken = async (userId) => {
     } catch (error) {
         throw new ApiError(
             500,
-            "omething went wrong while genetating access and refresh token",
+            "Something went wrong while genetating access and refresh token",
         );
     }
 };
@@ -71,6 +71,11 @@ const registerAdmin = asyncHandler(async (req, res) => {
 });
 
 // Admin Login
+
+/**
+ * FIXME: Don't expose tokens in response body
+        Returning access and refresh tokens in the response body defeats the security purpose of httpOnly cookies. JavaScript can access these tokens from the response, making them vulnerable to XSS attacks.
+ */
 const loginAdmin = asyncHandler(async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -122,6 +127,15 @@ const loginAdmin = asyncHandler(async (req, res) => {
 
 // Admin Password Update
 const updateAdminPassword = asyncHandler(async (req, res) => {
+    /**
+     * FIXME: Add old password verification and validation
+
+            Security issues:
+            1. No verification of current password before allowing change
+            2. No password strength validation
+            3. Bypassing model validation
+     */
+
     try {
         const { newPassword } = req.body;
 
@@ -133,7 +147,7 @@ const updateAdminPassword = asyncHandler(async (req, res) => {
         if (!admin) throw new ApiError(404, "Admin not found");
 
         admin.password = newPassword;
-        await admin.save({ validateBeforeSave: false });
+        await admin.save();
 
         return res
             .status(200)
@@ -149,7 +163,13 @@ const updateAdminPassword = asyncHandler(async (req, res) => {
 });
 
 // Role Management (Super Admin / Moderator)
+
 const updateAdminRole = asyncHandler(async (req, res) => {
+    /**
+     * FIXME: Don't expose tokens in response body
+    
+        Returning access and refresh tokens in the response body defeats the security purpose of httpOnly cookies. JavaScript can access these tokens from the response, making them vulnerable to XSS attacks.
+     */
     try {
         const { adminId } = req.params;
         const { role } = req.body;

@@ -22,14 +22,16 @@ const getAllEmployers = asyncHandler(async (req, res) => {
             .limit(Number(limit))
             .select("-password");
 
-        if (!employers.length) throw new ApiError(404, "No employees found");
+        if (!employers.length) throw new ApiError(404, "No employers found");
+
+        const totalCount = await Employer.countDocuments();
 
         return res
             .status(200)
             .json(
                 new ApiResponce(
                     200,
-                    { employers, totalEmployees: employers.length },
+                    { employers, totalEmployees: totalCount },
                     "Employees fetched successfully",
                 ),
             );
@@ -43,7 +45,7 @@ const getAllEmployers = asyncHandler(async (req, res) => {
     }
 });
 
-// get blocked employees
+// get blocked employers
 const getBlockedEmployers = asyncHandler(async (req, res) => {
     try {
         const {
@@ -155,6 +157,12 @@ const viewAdminSingleEmployer = asyncHandler(async (req, res) => {
 
 // Delete an employer
 const deleteEmployer = asyncHandler(async (req, res) => {
+    /**
+     * TODO: Use soft delete for consistency
+
+            Similar to the employee controller, consider using soft delete to maintain data integrity and enable the restore functionality.
+     */
+
     try {
         const { employerId } = req.params;
         if (!mongoose.Types.ObjectId.isValid(employerId))
@@ -182,6 +190,10 @@ const toggleEmployerStatus = asyncHandler(async (req, res) => {
         const { employerId } = req.params;
         const { reason } = req.body;
 
+        if (!employerId) {
+            throw new ApiError(400, "Employer id required");
+        }
+
         if (!mongoose.Types.ObjectId.isValid(employerId))
             throw new ApiError(400, "Invalid Employer ID");
 
@@ -189,9 +201,10 @@ const toggleEmployerStatus = asyncHandler(async (req, res) => {
         if (!employer) throw new ApiError(404, "Employer not found");
 
         employer.isBlocked = !employer.isBlocked;
-        employer.blockReason = reason || "No reason provided";
+        employer.blockReason = employer.isBlocked
+            ? reason || "No reason provided"
+            : null;
         await employer.save();
-
         const status = employer.isBlocked ? "blocked" : "unblocked";
         return res
             .status(200)

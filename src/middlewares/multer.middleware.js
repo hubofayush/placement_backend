@@ -18,6 +18,14 @@ const pdfStorage = multer.memoryStorage({
 export const upload = multer({
     storage,
 });
+// export const uploadPDF = multer({
+//     pdfStorage,
+// });
+
+// Fix critical configuration error in uploadPDF.
+
+// The multer configuration is incorrect - pdfStorage should be passed as the storage property.
+
 export const uploadPDF = multer({
-    pdfStorage,
+    storage: pdfStorage,
 });

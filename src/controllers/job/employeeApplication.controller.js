@@ -23,7 +23,7 @@ const getAllApplications = asyncHandler(async (req, res) => {
             .sort(sortStage)
             .skip(pageSkip)
             .limit(parsedLimit);
-        if (!applications) {
+        if ((applications, length)) {
             throw new ApiError(404, "No applications found");
         }
 
@@ -169,7 +169,7 @@ const viewJobApplication = asyncHandler(async (req, res) => {
         ]);
 
         if (newJobApplication.length === 0) {
-            throw new ApiError(400, "Job Applicatino not found");
+            throw new ApiError(400, "Job Application not found");
         }
 
         return res
@@ -225,7 +225,7 @@ const viewMyApplications = asyncHandler(async (req, res) => {
         ]);
         // end of updating controller //
 
-        if (jobApplications.length === null) {
+        if (jobApplications.length === 0) {
             return res
                 .status(200)
                 .json(new ApiResponce(200, [], "No Application Found"));
@@ -250,7 +250,7 @@ const viewSingleApplication = asyncHandler(async (req, res) => {
     try {
         const { applicationId } = req.params;
         if (!applicationId) {
-            throw new ApiError(400, "Applicarion ID required");
+            throw new ApiError(400, "Application ID required");
         }
 
         if (!mongoose.Types.ObjectId.isValid(applicationId)) {
@@ -304,7 +304,7 @@ const viewSingleApplication = asyncHandler(async (req, res) => {
                     jobApplicationInfo:
                         applicationInfo[0].jobApplicationInfo[0],
                 },
-                "Applicatin Found Successfull",
+                "Application Found Successfull",
             ),
         );
     } catch (error) {
@@ -434,7 +434,7 @@ const deletedApplication = asyncHandler(async (req, res) => {
         const shortlistedData = await ShortlistedApplication.findOneAndDelete({
             application: applicationFound._id,
         });
-        if (shortlistedData) {
+        if (!shortlistedData) {
             throw new ApiError(404, "no Shortlisted application found");
         }
 

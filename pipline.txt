@@ -1,0 +1,44 @@
+// ** Pipeline for employer to look applications 
+
+[
+  {
+    $match: {
+      companyName: "jio",
+    },
+  },
+  {
+    $lookup: {
+      from: "employers",
+      localField: "owner",
+      foreignField: "_id",
+      as: "malik",
+    },
+  },
+  {
+    $lookup: {
+      from: "applications",
+      localField: "applications",
+      foreignField: "_id",
+      as: "AppliedApplications",
+      pipeline: [
+        {
+          $lookup: {
+            from: "employees",
+            localField:"employee",
+            foreignField:"_id",
+            as:"applicant",
+            pipeline:[
+              {
+                $project:{
+                  fName:1,
+                  lName:1,
+                  education:1
+                }
+              }
+            ]
+          },
+        },
+      ],
+    },
+  },
+]
